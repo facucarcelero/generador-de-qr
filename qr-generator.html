@@ -36,78 +36,56 @@
         // Función para cargar la biblioteca QRCode con múltiples fuentes
         async function loadQRCodeLibrary() {
             return new Promise(async (resolve, reject) => {
-                // Priorizar el archivo local para evitar problemas de CORS
+                // Usar SOLO el archivo local para evitar problemas de CORS y CDN
                 const sources = [
-                    './qrcode.min.js', // Biblioteca local como primera opción
-                    'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js',
-                    'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js',
-                    'https://unpkg.com/qrcode@1.4.4/build/qrcode.min.js'
+                    './qrcode.min.js' // SOLO biblioteca local
                 ];
                 
-                let currentSourceIndex = 0;
-                let attempts = 0;
-                const maxAttempts = sources.length;
+                // Variables simplificadas para solo archivo local
                 
                 async function tryNextSource() {
-                    if (currentSourceIndex >= sources.length) {
-                        console.error('No se pudo cargar la biblioteca QRCode desde ninguna fuente');
+                    const currentSource = './qrcode.min.js';
+                    console.log('🔍 Intentando cargar biblioteca QRCode desde archivo local...');
+                    
+                    // Verificar si el archivo local está disponible
+                    const isAvailable = await checkLocalFile(currentSource);
+                    if (!isAvailable) {
+                        console.error('❌ Archivo local qrcode.min.js no encontrado');
                         hideLibraryLoading();
-                        reject(new Error('No se pudo cargar la biblioteca QRCode. Verifica tu conexión a internet.'));
+                        reject(new Error('No se pudo cargar la biblioteca QRCode. El archivo local qrcode.min.js no está disponible.'));
                         return;
                     }
                     
-                    attempts++;
-                    const currentSource = sources[currentSourceIndex];
-                    console.log(`Intento ${attempts}/${maxAttempts}: Cargando desde ${currentSource}`);
-                    
-                    // Si es un archivo local, verificar primero si está disponible
-                    if (currentSource.startsWith('./')) {
-                        const isAvailable = await checkLocalFile(currentSource);
-                        if (!isAvailable) {
-                            console.warn(`Local file not available: ${currentSource}`);
-                            currentSourceIndex++;
-                            tryNextSource();
-                            return;
-                        }
-                    }
+                    console.log('✅ Archivo local encontrado, cargando biblioteca...');
                     
                     const script = document.createElement('script');
                     script.src = currentSource;
                     script.async = true;
                     
-                    // Solo agregar crossOrigin para fuentes externas
-                    if (!currentSource.startsWith('./')) {
-                        script.crossOrigin = 'anonymous';
-                    }
-                    
                     const timeout = setTimeout(() => {
-                        console.warn(`Timeout loading from: ${currentSource}`);
+                        console.error('❌ Timeout cargando biblioteca local');
                         script.onerror();
-                    }, 5000); // Reducir timeout a 5 segundos
+                    }, 10000); // 10 segundos para archivo local
                     
                     script.onload = () => {
                         clearTimeout(timeout);
                         // Verificar si QRCode se cargó correctamente
                         if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
-                            if (currentSource.startsWith('./')) {
-                                console.log(`✅ QRCode library loaded successfully from local file: ${currentSource}`);
-                            } else {
-                                console.log(`✅ QRCode library loaded successfully from CDN: ${currentSource}`);
-                            }
+                            console.log('✅ QRCode library loaded successfully from local file');
                             hideLibraryLoading();
                             resolve();
                         } else {
-                            console.warn(`QRCode loaded from ${currentSource} but toCanvas method not available`);
-                            currentSourceIndex++;
-                            tryNextSource();
+                            console.error('❌ QRCode loaded but toCanvas method not available');
+                            hideLibraryLoading();
+                            reject(new Error('La biblioteca QRCode se cargó pero no tiene el método toCanvas necesario.'));
                         }
                     };
                     
                     script.onerror = () => {
                         clearTimeout(timeout);
-                        console.warn(`Failed to load from: ${currentSource}`);
-                        currentSourceIndex++;
-                        tryNextSource();
+                        console.error('❌ Failed to load local QRCode library');
+                        hideLibraryLoading();
+                        reject(new Error('No se pudo cargar la biblioteca QRCode desde el archivo local.'));
                     };
                     
                     document.head.appendChild(script);
@@ -124,19 +102,24 @@
         // Función para verificar si el archivo local está disponible
         function checkLocalFile(url) {
             return new Promise((resolve) => {
+                console.log(`🔍 Verificando disponibilidad de: ${url}`);
                 const xhr = new XMLHttpRequest();
                 xhr.open('HEAD', url, true);
-                xhr.timeout = 3000;
+                xhr.timeout = 5000; // Aumentar timeout a 5 segundos
                 
                 xhr.onload = () => {
-                    resolve(xhr.status === 200);
+                    const isAvailable = xhr.status === 200;
+                    console.log(`📁 Archivo ${url}: ${isAvailable ? '✅ Disponible' : '❌ No disponible'} (Status: ${xhr.status})`);
+                    resolve(isAvailable);
                 };
                 
                 xhr.onerror = () => {
+                    console.log(`❌ Error verificando archivo: ${url}`);
                     resolve(false);
                 };
                 
                 xhr.ontimeout = () => {
+                    console.log(`⏰ Timeout verificando archivo: ${url}`);
                     resolve(false);
                 };
                 
@@ -145,7 +128,7 @@
         }
 
         // Función para mostrar mensaje de error más amigable
-        function showLibraryError() {
+        function showLibraryError(message = 'Error al cargar la biblioteca QRCode') {
             const errorDiv = document.createElement('div');
             errorDiv.style.cssText = `
                 position: fixed;
@@ -156,31 +139,30 @@
                 border: 1px solid #fecaca;
                 border-radius: 8px;
                 padding: 20px;
-                max-width: 400px;
-                text-align: center;
+                max-width: 500px;
                 z-index: 10000;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             `;
+            
             errorDiv.innerHTML = `
-                <h3 style="color: #dc2626; margin-bottom: 10px;">Error de Carga</h3>
-                <p style="color: #7f1d1d; margin-bottom: 15px;">
-                    No se pudo cargar la biblioteca QRCode. Esto puede deberse a:
+                <h3 style="color: #dc2626; margin: 0 0 10px 0;">❌ Error de Carga</h3>
+                <p style="margin: 0 0 15px 0; color: #374151;">${message}</p>
+                <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 14px;">
+                    <strong>Posibles soluciones:</strong><br>
+                    1. Verifica que el archivo qrcode.min.js esté en la misma carpeta<br>
+                    2. Recarga la página (Ctrl+F5)<br>
+                    3. Limpia el caché del navegador
                 </p>
-                <ul style="text-align: left; color: #7f1d1d; margin-bottom: 15px;">
-                    <li>Problemas de conexión a internet</li>
-                    <li>Bloqueo de CDNs por firewall</li>
-                    <li>Servidores CDN temporalmente no disponibles</li>
-                </ul>
                 <button onclick="location.reload()" style="
                     background: #dc2626;
                     color: white;
                     border: none;
-                    padding: 10px 20px;
-                    border-radius: 6px;
+                    padding: 8px 16px;
+                    border-radius: 4px;
                     cursor: pointer;
-                    font-weight: 500;
-                ">Recargar Página</button>
-            `;
+                    font-size: 14px;
+                ">🔄 Recargar Página</button>
+                        `;
             document.body.appendChild(errorDiv);
         }
 
