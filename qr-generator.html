@@ -1277,6 +1277,10 @@
                 correctLevel: getErrorCorrectionLevel(document.getElementById('errorCorrection').value)
             };
 
+            // Debug: Mostrar las opciones en consola
+            console.log('QR Options:', options);
+            console.log('QR Text:', qrText);
+
             // Limpiar contenedor anterior y crear canvas
             const container = document.getElementById('qrContainer');
             container.innerHTML = '';
@@ -1289,6 +1293,7 @@
 
             // Generar QR con manejo de errores mejorado
             try {
+                console.log('Iniciando generación de QR...');
                 QRCode.toCanvas(canvas, qrText, options, function(error, generatedCanvas) {
                     showLoading(false);
                     
@@ -1299,9 +1304,15 @@
                     }
 
                     if (!generatedCanvas) {
+                        console.error('No se generó el canvas del QR');
                         showMessage('Error: No se pudo generar el canvas del QR', 'error');
                         return;
                     }
+
+                    console.log('QR generado exitosamente con colores:', {
+                        foreground: options.colorDark,
+                        background: options.colorLight
+                    });
 
                     // Agregar logo si existe
                     const logoFile = document.getElementById('logoFile').files[0];
