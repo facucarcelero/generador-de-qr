@@ -1399,7 +1399,7 @@
                     // Aplicar quiet zone personalizado
                     const quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
                     if (quietZoneSize >= 0) {
-                        applyQuietZoneToQR(generatedCanvas, quietZoneSize);
+                        applyQuietZoneToQR(generatedCanvas, quietZoneSize, options.colorLight);
                     }
 
                     // Agregar logo si existe
@@ -2109,25 +2109,41 @@
         }
 
                                 // Función para aplicar quiet zone personalizado al QR
-                        function applyQuietZoneToQR(canvas, quietZoneSize) {
+                        function applyQuietZoneToQR(canvas, quietZoneSize, qrLightColor) {
                             const ctx = canvas.getContext('2d');
                             const originalWidth = canvas.width;
                             const originalHeight = canvas.height;
                             
                             if (quietZoneSize <= 0) {
-                                // Si no hay espacio, el QR debe llenar completamente el canvas sin fondo
+                                // Si no hay espacio, el QR debe llenar completamente el canvas
+                                // Convertir qrLightColor a valores RGB
+                                let lightR, lightG, lightB;
+                                if (qrLightColor.startsWith('#')) {
+                                    const hex = qrLightColor.slice(1);
+                                    lightR = parseInt(hex.substring(0, 2), 16);
+                                    lightG = parseInt(hex.substring(2, 4), 16);
+                                    lightB = parseInt(hex.substring(4, 6), 16);
+                                } else if (qrLightColor.startsWith('rgb')) {
+                                    const rgb = qrLightColor.match(/\d+/g).map(Number);
+                                    lightR = rgb[0];
+                                    lightG = rgb[1];
+                                    lightB = rgb[2];
+                                } else {
+                                    lightR = 255; lightG = 255; lightB = 255;
+                                }
+                                
                                 // Obtener los datos de imagen actuales
                                 const imageData = ctx.getImageData(0, 0, originalWidth, originalHeight);
                                 const data = imageData.data;
                                 
-                                // Encontrar los límites del QR (dónde empieza y termina el patrón)
+                                // Encontrar los límites del QR (dónde empieza y termina el patrón oscuro)
                                 let minX = originalWidth, minY = originalHeight, maxX = 0, maxY = 0;
                                 
                                 for (let y = 0; y < originalHeight; y++) {
                                     for (let x = 0; x < originalWidth; x++) {
                                         const index = (y * originalWidth + x) * 4;
-                                        // Si el píxel no es completamente blanco (es parte del QR)
-                                        if (data[index] < 255 || data[index + 1] < 255 || data[index + 2] < 255) {
+                                        // Si el píxel NO es el color claro (es parte del patrón oscuro)
+                                        if (!(data[index] === lightR && data[index + 1] === lightG && data[index + 2] === lightB)) {
                                             minX = Math.min(minX, x);
                                             minY = Math.min(minY, y);
                                             maxX = Math.max(maxX, x);
@@ -2136,7 +2152,13 @@
                                     }
                                 }
                                 
-                                // Calcular las dimensiones del QR real
+                                // Si no se encontraron píxeles oscuros, retornar
+                                if (minX === originalWidth) {
+                                    console.log('No se encontraron píxeles oscuros en el QR');
+                                    return;
+                                }
+                                
+                                // Calcular las dimensiones del QR real (solo el patrón)
                                 const qrWidth = maxX - minX + 1;
                                 const qrHeight = maxY - minY + 1;
                                 
@@ -2146,8 +2168,9 @@
                                 newCanvas.height = originalHeight;
                                 const newCtx = newCanvas.getContext('2d');
                                 
-                                // Limpiar el canvas completamente (sin fondo)
-                                newCtx.clearRect(0, 0, originalWidth, originalHeight);
+                                // Llenar todo el canvas con el color de fondo del QR
+                                newCtx.fillStyle = qrLightColor;
+                                newCtx.fillRect(0, 0, originalWidth, originalHeight);
                                 
                                 // Calcular el factor de escala para que el QR llene todo el canvas
                                 const scaleX = originalWidth / qrWidth;
@@ -2179,7 +2202,7 @@
                                 ctx.clearRect(0, 0, originalWidth, originalHeight);
                                 ctx.drawImage(newCanvas, 0, 0);
                                 
-                                console.log('QR expandido para llenar todo el canvas sin fondo');
+                                console.log('QR expandido para llenar todo el canvas con fondo de color claro');
                                 return;
                             }
                             
