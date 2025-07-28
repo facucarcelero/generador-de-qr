@@ -431,20 +431,20 @@
             }
         }
 
-        /* Estilos para controles de bordes */
-        .border-controls {
+        /* Estilos para controles de quiet zone */
+        .quiet-zone-controls {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
 
-        .border-option {
+        .quiet-zone-option {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
 
-        .border-input-header {
+        .quiet-zone-input-header {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -452,31 +452,13 @@
             color: #374151;
         }
 
-        .border-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .border-toggle input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .toggle-label {
-            font-weight: 500;
-            color: #374151;
-            cursor: pointer;
-        }
-
-        .border-size-control {
+        .quiet-zone-size-control {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
-        .border-slider {
+        .quiet-zone-slider {
             flex: 1;
             height: 6px;
             border-radius: 3px;
@@ -485,7 +467,7 @@
             cursor: pointer;
         }
 
-        .border-slider::-webkit-slider-thumb {
+        .quiet-zone-slider::-webkit-slider-thumb {
             appearance: none;
             width: 20px;
             height: 20px;
@@ -494,7 +476,7 @@
             cursor: pointer;
         }
 
-        .border-slider::-moz-range-thumb {
+        .quiet-zone-slider::-moz-range-thumb {
             width: 20px;
             height: 20px;
             border-radius: 50%;
@@ -503,7 +485,7 @@
             border: none;
         }
 
-        #borderSizeValue {
+        #quietZoneSizeValue {
             font-weight: 600;
             color: #10b981;
             min-width: 50px;
@@ -930,28 +912,17 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Bordes del QR</label>
-                <div class="border-controls">
-                    <div class="border-option">
-                        <label class="border-input-header">🖼️ Mostrar Bordes</label>
-                        <div class="border-toggle">
-                            <input type="checkbox" id="showBorders" checked>
-                            <label for="showBorders" class="toggle-label">Activar bordes</label>
+                <label class="form-label">Espacio alrededor del QR</label>
+                <div class="quiet-zone-controls">
+                    <div class="quiet-zone-option">
+                        <label class="quiet-zone-input-header">📏 Tamaño del Espacio</label>
+                        <div class="quiet-zone-size-control">
+                            <input type="range" id="quietZoneSize" min="0" max="100" value="20" class="quiet-zone-slider">
+                            <span id="quietZoneSizeValue">20px</span>
                         </div>
-                    </div>
-                    <div class="border-option" id="borderOptions" style="display: block;">
-                        <label class="border-input-header">📏 Tamaño del Borde</label>
-                        <div class="border-size-control">
-                            <input type="range" id="borderSize" min="0" max="50" value="10" class="border-slider">
-                            <span id="borderSizeValue">10px</span>
-                        </div>
-                    </div>
-                    <div class="border-option" id="borderColorOption" style="display: block;">
-                        <label class="border-input-header">🎨 Color del Borde</label>
-                        <div class="color-input-row">
-                            <input type="color" id="borderColor" value="#000000">
-                            <input type="text" class="color-code-input" id="borderColorHex" value="#000000" placeholder="#000000">
-                        </div>
+                        <small style="color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+                            Controla el espacio blanco alrededor del código QR para mejor escaneo
+                        </small>
                     </div>
                 </div>
             </div>
@@ -1425,13 +1396,11 @@
                     // Aplicar colores personalizados al canvas
                     colorizeQRCanvas(generatedCanvas, options.colorDark, options.colorLight);
 
-                    // Aplicar bordes si están habilitados
-                    const showBorders = document.getElementById('showBorders').checked;
-                    if (showBorders) {
-                        const borderSize = parseInt(document.getElementById('borderSize').value);
-                        const borderColor = document.getElementById('borderColor').value;
-                        applyBorderToQR(generatedCanvas, borderSize, borderColor);
-                    }
+                                                        // Aplicar quiet zone personalizado
+                                    const quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
+                                    if (quietZoneSize > 0) {
+                                        applyQuietZoneToQR(generatedCanvas, quietZoneSize);
+                                    }
 
                     // Agregar logo si existe
                     const logoFile = document.getElementById('logoFile').files[0];
@@ -1883,78 +1852,24 @@
             }
         }
 
-        // Funcionalidad de controles de bordes
-        function initializeBorderControls() {
-            console.log('Inicializando controles de bordes...');
-            
-            const showBordersElement = document.getElementById('showBorders');
-            const borderSizeElement = document.getElementById('borderSize');
-            const borderSizeValueElement = document.getElementById('borderSizeValue');
-            const borderColorElement = document.getElementById('borderColor');
-            const borderColorHexElement = document.getElementById('borderColorHex');
-            const borderOptionsElement = document.getElementById('borderOptions');
-            const borderColorOptionElement = document.getElementById('borderColorOption');
-            
-            if (showBordersElement) {
-                showBordersElement.addEventListener('change', function() {
-                    const showBorders = this.checked;
-                    console.log('Mostrar bordes cambiado a:', showBorders);
-                    
-                    // Mostrar/ocultar opciones de bordes
-                    if (showBorders) {
-                        borderOptionsElement.style.display = 'block';
-                        borderColorOptionElement.style.display = 'block';
-                    } else {
-                        borderOptionsElement.style.display = 'none';
-                        borderColorOptionElement.style.display = 'none';
+                            // Funcionalidad de controles de quiet zone
+                    function initializeQuietZoneControls() {
+                        console.log('Inicializando controles de quiet zone...');
+                        
+                        const quietZoneSizeElement = document.getElementById('quietZoneSize');
+                        const quietZoneSizeValueElement = document.getElementById('quietZoneSizeValue');
+                        
+                        if (quietZoneSizeElement) {
+                            quietZoneSizeElement.addEventListener('input', function() {
+                                const size = this.value;
+                                console.log('Tamaño de quiet zone cambiado a:', size + 'px');
+                                quietZoneSizeValueElement.textContent = size + 'px';
+                                generateQR();
+                            });
+                        } else {
+                            console.error('Elemento quietZoneSize no encontrado');
+                        }
                     }
-                    
-                    // Generar QR con los nuevos ajustes de bordes
-                    generateQR();
-                });
-            } else {
-                console.error('Elemento showBorders no encontrado');
-            }
-
-            if (borderSizeElement) {
-                borderSizeElement.addEventListener('input', function() {
-                    const size = this.value;
-                    console.log('Tamaño de borde cambiado a:', size + 'px');
-                    borderSizeValueElement.textContent = size + 'px';
-                    generateQR();
-                });
-            } else {
-                console.error('Elemento borderSize no encontrado');
-            }
-
-            if (borderColorElement) {
-                borderColorElement.addEventListener('change', function() {
-                    const hexValue = this.value.toUpperCase();
-                    console.log('Color de borde cambiado a:', hexValue);
-                    borderColorHexElement.value = hexValue;
-                    generateQR();
-                });
-            } else {
-                console.error('Elemento borderColor no encontrado');
-            }
-
-            if (borderColorHexElement) {
-                borderColorHexElement.addEventListener('input', function() {
-                    let hexValue = this.value.toUpperCase();
-                    if (hexValue.startsWith('#')) {
-                        hexValue = hexValue.substring(1);
-                    }
-                    if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
-                        hexValue = '#' + hexValue;
-                        console.log('Color de borde (hex) cambiado a:', hexValue);
-                        borderColorElement.value = hexValue;
-                        generateQR();
-                    }
-                });
-            } else {
-                console.error('Elemento borderColorHex no encontrado');
-            }
-        }
 
         // Inicializar todos los event listeners cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
@@ -1967,8 +1882,8 @@
                 // Inicializar color pickers
                 initializeColorPickers();
                 
-                // Inicializar controles de bordes
-                initializeBorderControls();
+                                        // Inicializar controles de quiet zone
+                        initializeQuietZoneControls();
                 
                 // Event listeners para URL y nombre
                 const qrUrlElement = document.getElementById('qrUrl');
@@ -2193,33 +2108,37 @@
             } : { r: 0, g: 0, b: 0 };
         }
 
-        // Función para aplicar bordes al QR
-        function applyBorderToQR(canvas, borderSize, borderColor) {
-            if (borderSize <= 0) return;
+        // Función para aplicar quiet zone personalizado al QR
+        function applyQuietZoneToQR(canvas, quietZoneSize) {
+            if (quietZoneSize <= 0) return;
             
             const ctx = canvas.getContext('2d');
             const originalWidth = canvas.width;
             const originalHeight = canvas.height;
             
-            // Crear un nuevo canvas con espacio para los bordes
+            // Crear un nuevo canvas con espacio para el quiet zone
             const newCanvas = document.createElement('canvas');
-            newCanvas.width = originalWidth + (borderSize * 2);
-            newCanvas.height = originalHeight + (borderSize * 2);
+            newCanvas.width = originalWidth + (quietZoneSize * 2);
+            newCanvas.height = originalHeight + (quietZoneSize * 2);
             const newCtx = newCanvas.getContext('2d');
             
-            // Dibujar el borde
-            newCtx.fillStyle = borderColor;
+            // Obtener el color de fondo actual del QR
+            const imageData = ctx.getImageData(0, 0, 1, 1);
+            const backgroundColor = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
+            
+            // Dibujar el fondo del quiet zone con el mismo color que el fondo del QR
+            newCtx.fillStyle = backgroundColor;
             newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
             
             // Copiar el QR original al centro del nuevo canvas
-            newCtx.drawImage(canvas, borderSize, borderSize);
+            newCtx.drawImage(canvas, quietZoneSize, quietZoneSize);
             
             // Reemplazar el canvas original con el nuevo
             canvas.width = newCanvas.width;
             canvas.height = newCanvas.height;
             ctx.drawImage(newCanvas, 0, 0);
             
-            console.log('Borde aplicado al QR:', { size: borderSize, color: borderColor });
+            console.log('Quiet zone aplicado al QR:', { size: quietZoneSize });
         }
     </script>
 </body>
