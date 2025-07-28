@@ -1280,6 +1280,8 @@
             // Debug: Mostrar las opciones en consola
             console.log('QR Options:', options);
             console.log('QR Text:', qrText);
+            console.log('QRCode library available:', typeof QRCode !== 'undefined');
+            console.log('QRCode.toCanvas available:', typeof QRCode.toCanvas === 'function');
 
             // Limpiar contenedor anterior y crear canvas
             const container = document.getElementById('qrContainer');
@@ -1698,62 +1700,111 @@
 
         // Funcionalidad avanzada de colores
         function initializeColorPickers() {
-            // Event listeners para color picker nativo
-            document.getElementById('foregroundColor').addEventListener('change', function() {
-                const hexValue = this.value.toUpperCase();
-                document.getElementById('foregroundHex').value = hexValue;
-                // Generar QR siempre que cambie el color, independientemente de si hay URL
-                generateQR();
-            });
+            console.log('Inicializando color pickers...');
+            
+            const foregroundColorElement = document.getElementById('foregroundColor');
+            const backgroundColorElement = document.getElementById('backgroundColor');
+            
+            if (foregroundColorElement) {
+                // Event listeners para color picker nativo
+                foregroundColorElement.addEventListener('change', function() {
+                    const hexValue = this.value.toUpperCase();
+                    console.log('Color principal cambiado a:', hexValue);
+                    document.getElementById('foregroundHex').value = hexValue;
+                    // Generar QR siempre que cambie el color, independientemente de si hay URL
+                    generateQR();
+                });
+            } else {
+                console.error('Elemento foregroundColor no encontrado');
+            }
 
-            document.getElementById('backgroundColor').addEventListener('change', function() {
-                const hexValue = this.value.toUpperCase();
-                document.getElementById('backgroundColorHex').value = hexValue;
-                // Generar QR siempre que cambie el color, independientemente de si hay URL
-                generateQR();
-            });
+            if (backgroundColorElement) {
+                backgroundColorElement.addEventListener('change', function() {
+                    const hexValue = this.value.toUpperCase();
+                    console.log('Color de fondo cambiado a:', hexValue);
+                    document.getElementById('backgroundColorHex').value = hexValue;
+                    // Generar QR siempre que cambie el color, independientemente de si hay URL
+                    generateQR();
+                });
+            } else {
+                console.error('Elemento backgroundColor no encontrado');
+            }
 
             // Event listeners para input de código hex
-            document.getElementById('foregroundHex').addEventListener('input', function() {
-                let hexValue = this.value.toUpperCase();
-                if (hexValue.startsWith('#')) {
-                    hexValue = hexValue.substring(1);
-                }
-                if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
-                    hexValue = '#' + hexValue;
-                    document.getElementById('foregroundColor').value = hexValue;
-                    // Generar QR siempre que cambie el color, independientemente de si hay URL
-                    generateQR();
-                }
-            });
+            const foregroundHexElement = document.getElementById('foregroundHex');
+            const backgroundColorHexElement = document.getElementById('backgroundColorHex');
+            
+            if (foregroundHexElement) {
+                foregroundHexElement.addEventListener('input', function() {
+                    let hexValue = this.value.toUpperCase();
+                    if (hexValue.startsWith('#')) {
+                        hexValue = hexValue.substring(1);
+                    }
+                    if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
+                        hexValue = '#' + hexValue;
+                        console.log('Color principal (hex) cambiado a:', hexValue);
+                        document.getElementById('foregroundColor').value = hexValue;
+                        // Generar QR siempre que cambie el color, independientemente de si hay URL
+                        generateQR();
+                    }
+                });
+            } else {
+                console.error('Elemento foregroundHex no encontrado');
+            }
 
-            document.getElementById('backgroundColorHex').addEventListener('input', function() {
-                let hexValue = this.value.toUpperCase();
-                if (hexValue.startsWith('#')) {
-                    hexValue = hexValue.substring(1);
-                }
-                if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
-                    hexValue = '#' + hexValue;
-                    document.getElementById('backgroundColor').value = hexValue;
-                    // Generar QR siempre que cambie el color, independientemente de si hay URL
-                    generateQR();
-                }
-            });
+            if (backgroundColorHexElement) {
+                backgroundColorHexElement.addEventListener('input', function() {
+                    let hexValue = this.value.toUpperCase();
+                    if (hexValue.startsWith('#')) {
+                        hexValue = hexValue.substring(1);
+                    }
+                    if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
+                        hexValue = '#' + hexValue;
+                        console.log('Color de fondo (hex) cambiado a:', hexValue);
+                        document.getElementById('backgroundColor').value = hexValue;
+                        // Generar QR siempre que cambie el color, independientemente de si hay URL
+                        generateQR();
+                    }
+                });
+            } else {
+                console.error('Elemento backgroundColorHex no encontrado');
+            }
         }
 
-        // Inicializar color pickers cuando el DOM esté listo
+        // Inicializar todos los event listeners cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando event listeners...');
+            
+            // Inicializar color pickers
             initializeColorPickers();
-        });
-
-        document.getElementById('qrSize').addEventListener('change', function() {
-            // Generar QR siempre que cambie el tamaño, independientemente de si hay URL
-            generateQR();
-        });
-
-        document.getElementById('errorCorrection').addEventListener('change', function() {
-            // Generar QR siempre que cambie la corrección de errores, independientemente de si hay URL
-            generateQR();
+            
+            // Event listeners para tamaño y corrección de errores
+            const qrSizeElement = document.getElementById('qrSize');
+            const errorCorrectionElement = document.getElementById('errorCorrection');
+            
+            if (qrSizeElement) {
+                qrSizeElement.addEventListener('change', function() {
+                    console.log('Tamaño cambiado a:', this.value);
+                    generateQR();
+                });
+            } else {
+                console.error('Elemento qrSize no encontrado');
+            }
+            
+            if (errorCorrectionElement) {
+                errorCorrectionElement.addEventListener('change', function() {
+                    console.log('Corrección de errores cambiada a:', this.value);
+                    generateQR();
+                });
+            } else {
+                console.error('Elemento errorCorrection no encontrado');
+            }
+            
+            // Generar QR inicial para mostrar colores
+            setTimeout(() => {
+                console.log('Generando QR inicial para mostrar colores...');
+                generateQR();
+            }, 1000);
         });
 
         // Cerrar modal al hacer clic fuera
