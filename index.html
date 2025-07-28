@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V16 - FIXED BACKGROUND</title>
+    <title>Generador QR Los Nogales - V17 - FIXED BLANK PAGE</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -34,37 +34,36 @@
     <!-- QR Code library -->
     <script src="qr-stats.js"></script>
     <script>
-        // Script inmediato para arreglar el layout
+        // Script inmediato para arreglar el layout - VERSIÓN CORREGIDA
         (function() {
-            // Ocultar inmediatamente cualquier indicador de carga
-            function hideAllLoading() {
-                const loadingElements = document.querySelectorAll('#library-loading, .loading-overlay, .library-loading');
+            // Ocultar solo el indicador de carga específico
+            function hideLoadingIndicator() {
+                // Solo eliminar elementos con ID específico
+                const loadingDiv = document.getElementById('library-loading');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+                
+                // Solo eliminar elementos con clases específicas
+                const loadingElements = document.querySelectorAll('.loading-overlay, .library-loading');
                 loadingElements.forEach(el => el.remove());
                 
-                // También buscar por texto
-                const textElements = document.querySelectorAll('*');
-                textElements.forEach(el => {
-                    if (el.textContent && el.textContent.includes('Cargando biblioteca QRCode')) {
-                        el.style.display = 'none';
-                        el.remove();
-                    }
-                });
+                // NO eliminar elementos por texto para evitar eliminar contenido importante
             }
             
             // Ejecutar inmediatamente
-            hideAllLoading();
+            hideLoadingIndicator();
             
             // Y también cuando el DOM esté listo
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', hideAllLoading);
+                document.addEventListener('DOMContentLoaded', hideLoadingIndicator);
             } else {
-                hideAllLoading();
+                hideLoadingIndicator();
             }
             
             // Y también después de un delay
-            setTimeout(hideAllLoading, 100);
-            setTimeout(hideAllLoading, 500);
-            setTimeout(hideAllLoading, 1000);
+            setTimeout(hideLoadingIndicator, 100);
+            setTimeout(hideLoadingIndicator, 500);
         })();
         
         // V4 - SOLUCIÓN DEFINITIVA: Cargar biblioteca QRCode
