@@ -31,6 +31,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- QR Code library -->
+    <script src="./qr-stats.js"></script>
     <script>
         // Función para cargar la biblioteca QRCode con múltiples fuentes
         function loadQRCodeLibrary() {
@@ -1258,13 +1259,16 @@
             let qrText = url;
             if (qrType === 'dynamic') {
                 // Usar el ID del QR actual si existe (para edición), o generar uno nuevo
+                // Para QR dinámicos, usar la URL directa del usuario con parámetros de estadísticas
                 const idForDynamicQR = currentQRData && currentQRData.id ? currentQRData.id : generateId();
                 const qrNameForDynamic = document.getElementById('qrTitle').value.trim() || 'QR Dinámico';
                 
+                // Agregar parámetros de estadísticas a la URL
+                qrText = this.addStatsParamsToUrl(url, idForDynamicQR, qrNameForDynamic);
+                
+                // Guardar información para estadísticas (se usará internamente)
                 const encodedUrl = btoa(encodeURIComponent(url));
                 const encodedName = btoa(encodeURIComponent(qrNameForDynamic));
-                
-                qrText = `${window.location.origin}${window.location.pathname.replace('qr-generator.html', 'qr-redirect.html')}?id=${idForDynamicQR}&url=${encodedUrl}&name=${encodedName}`;
             }
             
             const options = {
@@ -1332,7 +1336,9 @@
                         const encodedName = btoa(encodeURIComponent(qrNameForDynamic));
                         
                         currentQRData.id = idForDynamicQR;
-                        currentQRData.redirectUrl = `${window.location.origin}${window.location.pathname.replace('qr-generator.html', 'qr-redirect.html')}?id=${idForDynamicQR}&url=${encodedUrl}&name=${encodedName}`;
+                        currentQRData.redirectUrl = url; // Usar la URL directa
+                        currentQRData.encodedUrl = encodedUrl; // Guardar para estadísticas
+                        currentQRData.encodedName = encodedName; // Guardar para estadísticas
                     }
 
                     // Mostrar información
@@ -1399,6 +1405,19 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
 
+        function addStatsParamsToUrl(url, qrId, qrName) {
+            try {
+                const urlObj = new URL(url);
+                urlObj.searchParams.set('qr_id', qrId);
+                urlObj.searchParams.set('qr_name', encodeURIComponent(qrName));
+                return urlObj.toString();
+            } catch (error) {
+                // Si no es una URL válida, agregar parámetros al final
+                const separator = url.includes('?') ? '&' : '?';
+                return `${url}${separator}qr_id=${qrId}&qr_name=${encodeURIComponent(qrName)}`;
+            }
+        }
+
         function saveQR() {
             if (!currentQRData) {
                 showMessage('Primero debes generar un código QR', 'error');
@@ -1438,7 +1457,7 @@
                 // Codificar la URL en base64 para evitar problemas con caracteres especiales
                 const encodedUrl = btoa(encodeURIComponent(currentQRData.url));
                 const encodedName = btoa(encodeURIComponent(name));
-                qrData.redirectUrl = `./qr-redirect.html?id=${qrData.id}&url=${encodedUrl}&name=${encodedName}`;
+                                        qrData.redirectUrl = qrData.url; // Usar la URL directa
                 qrData.url = qrData.redirectUrl; // Usar la URL de redirección para el QR
             } else {
                 qrData.url = currentQRData.url; // Para QRs estáticos, usar la URL original
@@ -1559,7 +1578,7 @@
                 if (savedQRs[qrIndex].type === 'dynamic') {
                     const encodedUrl = btoa(encodeURIComponent(newUrl));
                     const encodedName = btoa(encodeURIComponent(savedQRs[qrIndex].name));
-                    savedQRs[qrIndex].redirectUrl = `./qr-redirect.html?id=${savedQRs[qrIndex].id}&url=${encodedUrl}&name=${encodedName}`;
+                    savedQRs[qrIndex].redirectUrl = savedQRs[qrIndex].url; // Usar la URL directa
                     savedQRs[qrIndex].url = savedQRs[qrIndex].redirectUrl;
                 }
                 
