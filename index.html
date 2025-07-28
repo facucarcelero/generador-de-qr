@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V24 - FIXED WINDOW.LOAD</title>
+    <title>Generador QR Los Nogales - V25 - FIXED DOM VERIFICATION</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1827,8 +1827,19 @@
                 .then(() => {
                     console.log('QRCode library loaded successfully');
                     
-                    // Inicializar la aplicación después de cargar la biblioteca
-                    initializeApplication();
+                    // Esperar un poco más para asegurar que el DOM esté completamente renderizado
+                    setTimeout(() => {
+                        // Verificar que los elementos principales existan
+                        const testElement = document.getElementById('qrUrl');
+                        if (testElement) {
+                            console.log('Elementos del DOM disponibles, inicializando aplicación...');
+                            initializeApplication();
+                        } else {
+                            console.warn('Elementos del DOM aún no disponibles, esperando...');
+                            // Reintentar después de un delay
+                            setTimeout(initializeApplication, 500);
+                        }
+                    }, 100);
                 })
                 .catch((error) => {
                     console.error('Error cargando biblioteca QRCode:', error);
