@@ -1809,10 +1809,19 @@
             const testContainer = document.getElementById('qrContainer');
             testContainer.innerHTML = '';
             
+            // Crear un contenedor separado para el test
+            const testDiv = document.createElement('div');
+            testDiv.style.border = '2px solid red';
+            testDiv.style.padding = '10px';
+            testDiv.style.margin = '10px';
+            testDiv.innerHTML = '<h4>TEST COLORES - QR ROJO Y VERDE</h4>';
+            testContainer.appendChild(testDiv);
+            
             const testCanvas = document.createElement('canvas');
             testCanvas.width = 200;
             testCanvas.height = 200;
-            testContainer.appendChild(testCanvas);
+            testCanvas.style.border = '1px solid blue';
+            testDiv.appendChild(testCanvas);
             
             const testOptions = {
                 width: 200,
@@ -1830,7 +1839,30 @@
                     return;
                 }
                 console.log('Test directo exitoso con colores:', testOptions);
-                testContainer.appendChild(generatedCanvas);
+                console.log('Canvas generado:', generatedCanvas);
+                console.log('Canvas width:', generatedCanvas.width);
+                console.log('Canvas height:', generatedCanvas.height);
+                
+                // Verificar si el canvas tiene contenido
+                const ctx = generatedCanvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, generatedCanvas.width, generatedCanvas.height);
+                console.log('ImageData length:', imageData.data.length);
+                
+                // Verificar algunos píxeles para ver si tienen color
+                let redPixels = 0;
+                let greenPixels = 0;
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    if (imageData.data[i] > 200 && imageData.data[i+1] < 50 && imageData.data[i+2] < 50) {
+                        redPixels++;
+                    }
+                    if (imageData.data[i] < 50 && imageData.data[i+1] > 200 && imageData.data[i+2] < 50) {
+                        greenPixels++;
+                    }
+                }
+                console.log('Píxeles rojos encontrados:', redPixels);
+                console.log('Píxeles verdes encontrados:', greenPixels);
+                
+                testDiv.appendChild(generatedCanvas);
             });
             
             // También generar el QR normal
