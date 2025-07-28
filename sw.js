@@ -37,13 +37,19 @@ self.addEventListener('fetch', event => {
               return response;
             }
 
-            // Clonar la respuesta
-            const responseToCache = response.clone();
+            // Solo cachear peticiones GET (no HEAD, POST, etc.)
+            if (event.request.method === 'GET') {
+              // Clonar la respuesta
+              const responseToCache = response.clone();
 
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                })
+                .catch(error => {
+                  console.log('Error al cachear:', error);
+                });
+            }
 
             return response;
           });
