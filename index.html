@@ -1408,6 +1408,51 @@
     </style>
 </head>
 <body>
+    <!-- Script inmediato para forzar corrección de problemas de carga -->
+    <script>
+        // Forzar eliminación inmediata del indicador de carga
+        (function() {
+            function forceCleanup() {
+                // Eliminar cualquier elemento de carga
+                const loadingElements = document.querySelectorAll('[id*="loading"], [class*="loading"]');
+                loadingElements.forEach(el => el.remove());
+                
+                // Buscar por texto y eliminar
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(el => {
+                    if (el.textContent && el.textContent.includes('Cargando biblioteca')) {
+                        el.remove();
+                    }
+                });
+                
+                // Corregir fondo azul
+                if (document.body) {
+                    document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                }
+                if (document.documentElement) {
+                    document.documentElement.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                }
+                
+                console.log('🧹 Limpieza forzada completada');
+            }
+            
+            // Ejecutar inmediatamente
+            forceCleanup();
+            
+            // Y también después de que el DOM esté listo
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceCleanup);
+            } else {
+                forceCleanup();
+            }
+            
+            // Y también después de un timeout
+            setTimeout(forceCleanup, 100);
+            setTimeout(forceCleanup, 500);
+            setTimeout(forceCleanup, 1000);
+        })();
+    </script>
+
     <!-- V4 - SOLUCIÓN DEFINITIVA: Página principal SIN REDIRECCIONES -->
     <!-- Header -->
     <header class="header">
