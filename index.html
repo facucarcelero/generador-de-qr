@@ -1413,58 +1413,61 @@
         // Forzar eliminación inmediata del indicador de carga
         (function() {
             function forceCleanup() {
-                // Solo eliminar elementos específicos de carga
-                const libraryLoading = document.getElementById('library-loading');
-                if (libraryLoading) {
-                    libraryLoading.remove();
-                    console.log('🧹 Indicador de carga removido');
-                }
+                // Eliminar específicamente el modal de carga que se ve en la imagen
+                const loadingModals = document.querySelectorAll('div');
+                loadingModals.forEach(div => {
+                    if (div.textContent && div.textContent.includes('Cargando biblioteca')) {
+                        div.remove();
+                        console.log('🧹 Modal de carga removido');
+                    }
+                });
                 
-                // Buscar elementos con clase 'loading' que contengan texto específico
-                const loadingElements = document.querySelectorAll('.loading');
-                loadingElements.forEach(el => {
-                    if (el.textContent && el.textContent.includes('Cargando biblioteca')) {
+                // Eliminar elementos con spinner
+                const spinners = document.querySelectorAll('.spinner, [class*="spinner"]');
+                spinners.forEach(spinner => {
+                    spinner.closest('div').remove();
+                    console.log('🧹 Spinner removido');
+                });
+                
+                // Eliminar elementos blancos que puedan ser el modal
+                const whiteElements = document.querySelectorAll('div');
+                whiteElements.forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    if (style.backgroundColor === 'rgb(255, 255, 255)' && 
+                        el.textContent && el.textContent.includes('Cargando')) {
                         el.remove();
-                        console.log('🧹 Elemento de carga removido por clase');
+                        console.log('🧹 Elemento blanco de carga removido');
                     }
                 });
                 
-                // Corregir fondo azul solo si es necesario
-                if (document.body && document.body.style.background === 'blue') {
-                    document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-                    console.log('🎨 Fondo corregido');
-                }
-                
-                // Forzar corrección del fondo azul de manera más agresiva
+                // Corregir fondo oscuro - forzar fondo claro
                 if (document.body) {
-                    document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
-                    document.body.style.backgroundColor = 'transparent';
+                    document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important';
+                    document.body.style.backgroundColor = '#ffffff !important';
                 }
                 if (document.documentElement) {
-                    document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
-                    document.documentElement.style.backgroundColor = 'transparent';
+                    document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important';
+                    document.documentElement.style.backgroundColor = '#ffffff !important';
                 }
                 
-                // Asegurar que el HTML también tenga el fondo correcto
-                if (document.documentElement) {
-                    document.documentElement.style.cssText += '; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;';
+                // Asegurar que el contenido principal sea visible
+                const mainContainer = document.querySelector('.main-container');
+                if (mainContainer) {
+                    mainContainer.style.display = 'block';
+                    mainContainer.style.visibility = 'visible';
+                    mainContainer.style.opacity = '1';
                 }
                 
-                // Mostrar el contenido principal si está oculto
-                const mainContent = document.querySelector('.main-container');
-                if (mainContent && mainContent.style.display === 'none') {
-                    mainContent.style.display = 'block';
-                    console.log('📱 Contenido principal mostrado');
-                }
-                
-                // Mostrar canvases QR si están ocultos
-                const canvases = document.querySelectorAll('canvas');
-                canvases.forEach(canvas => {
-                    if (canvas.style.display === 'none' && canvas.width > 0) {
-                        canvas.style.display = 'block';
-                        console.log('🔍 Canvas QR mostrado');
+                // Mostrar todos los elementos que puedan estar ocultos
+                const hiddenElements = document.querySelectorAll('[style*="display: none"], [style*="visibility: hidden"]');
+                hiddenElements.forEach(el => {
+                    if (!el.textContent.includes('Cargando')) {
+                        el.style.display = 'block';
+                        el.style.visibility = 'visible';
                     }
                 });
+                
+                console.log('🧹 Limpieza completa realizada');
             }
             
             // Ejecutar inmediatamente
@@ -1477,9 +1480,11 @@
                 forceCleanup();
             }
             
-            // Y también después de un timeout
+            // Y también después de múltiples timeouts para asegurar
             setTimeout(forceCleanup, 100);
             setTimeout(forceCleanup, 500);
+            setTimeout(forceCleanup, 1000);
+            setTimeout(forceCleanup, 2000);
         })();
     </script>
 
@@ -3246,4 +3251,5 @@
         }
     </script>
 </body>
+</html> 
 </html> 
