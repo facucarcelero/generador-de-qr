@@ -44,6 +44,7 @@
                 if (!isAvailable) {
                     console.error('❌ Archivo local qrcode.min.js no encontrado');
                     hideLibraryLoading();
+                    showGeneratedQR(); // Mostrar el QR generado
                     reject(new Error('No se pudo cargar la biblioteca QRCode. El archivo local qrcode.min.js no está disponible.'));
                     return;
                 }
@@ -65,6 +66,7 @@
                     if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
                         console.log('✅ V4 - QRCode library loaded successfully from local file');
                         hideLibraryLoading();
+                        showGeneratedQR(); // Mostrar el QR generado
                         resolve();
                     } else {
                         console.error('❌ V4 - QRCode loaded but toCanvas method not available');
@@ -77,6 +79,7 @@
                     clearTimeout(timeout);
                     console.error('❌ V4 - Failed to load local QRCode library');
                     hideLibraryLoading();
+                    showGeneratedQR(); // Mostrar el QR generado
                     reject(new Error('No se pudo cargar la biblioteca QRCode desde el archivo local.'));
                 };
                 
@@ -186,9 +189,60 @@
         }
 
         function hideLibraryLoading() {
-            const loadingDiv = document.getElementById('library-loading');
-            if (loadingDiv) {
-                loadingDiv.remove();
+            try {
+                // Buscar por ID
+                const loadingDiv = document.getElementById('library-loading');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                    console.log('✅ Indicador de carga removido por ID');
+                    return;
+                }
+                
+                // Buscar por clase
+                const loadingElements = document.querySelectorAll('.loading');
+                loadingElements.forEach(el => {
+                    if (el.textContent.includes('Cargando biblioteca')) {
+                        el.remove();
+                        console.log('✅ Indicador de carga removido por clase');
+                    }
+                });
+                
+                // Buscar por texto
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(el => {
+                    if (el.textContent && el.textContent.includes('Cargando biblioteca QR')) {
+                        el.remove();
+                        console.log('✅ Indicador de carga removido por texto');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error al ocultar indicador de carga:', error);
+            }
+        }
+
+        function showGeneratedQR() {
+            try {
+                // Buscar el canvas generado y mostrarlo
+                const canvases = document.querySelectorAll('canvas');
+                canvases.forEach(canvas => {
+                    if (canvas.style.display === 'none') {
+                        canvas.style.display = 'block';
+                        console.log('✅ Canvas QR mostrado');
+                    }
+                });
+                
+                // Actualizar el área de preview
+                const previewArea = document.querySelector('.preview-section');
+                if (previewArea) {
+                    const placeholder = previewArea.querySelector('p');
+                    if (placeholder && placeholder.textContent.includes('Ingresa una URL')) {
+                        placeholder.style.display = 'none';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error al mostrar QR generado:', error);
             }
         }
 
