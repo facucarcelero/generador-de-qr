@@ -1800,11 +1800,42 @@
                 console.error('Elemento errorCorrection no encontrado');
             }
             
-            // Generar QR inicial para mostrar colores
-            setTimeout(() => {
-                console.log('Generando QR inicial para mostrar colores...');
-                generateQR();
-            }, 1000);
+                    // Generar QR inicial para mostrar colores
+        setTimeout(() => {
+            console.log('Generando QR inicial para mostrar colores...');
+            
+            // Test directo de colores
+            console.log('=== TEST DIRECTO DE COLORES ===');
+            const testContainer = document.getElementById('qrContainer');
+            testContainer.innerHTML = '';
+            
+            const testCanvas = document.createElement('canvas');
+            testCanvas.width = 200;
+            testCanvas.height = 200;
+            testContainer.appendChild(testCanvas);
+            
+            const testOptions = {
+                width: 200,
+                height: 200,
+                colorDark: '#FF0000', // Rojo
+                colorLight: '#00FF00', // Verde
+                correctLevel: 1
+            };
+            
+            console.log('Test Options:', testOptions);
+            
+            QRCode.toCanvas(testCanvas, 'https://test.com', testOptions, function(error, generatedCanvas) {
+                if (error) {
+                    console.error('Error en test directo:', error);
+                    return;
+                }
+                console.log('Test directo exitoso con colores:', testOptions);
+                testContainer.appendChild(generatedCanvas);
+            });
+            
+            // También generar el QR normal
+            generateQR();
+        }, 1000);
         });
 
         // Cerrar modal al hacer clic fuera
