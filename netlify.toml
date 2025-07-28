@@ -1,13 +1,12 @@
 [build]
   publish = "."
-  command = ""
 
-# V4 - SOLUCIÓN DEFINITIVA: Configuración agresiva para eliminar redirecciones
 [[redirects]]
   from = "/"
   to = "/index.html"
   status = 200
   force = true
+  headers = {Cache-Control = "no-cache, no-store, must-revalidate"}
 
 [[redirects]]
   from = "/qr-generator.html"
@@ -21,15 +20,19 @@
   status = 404
   force = true
 
-# Configuración adicional para forzar redeploy
-[build.environment]
-  NODE_VERSION = "18"
-  NETLIFY_USE_YARN = "false"
-
-# Headers para evitar cache
+# Headers adicionales para evitar caché
 [[headers]]
   for = "/*"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
     Pragma = "no-cache"
-    Expires = "0" 
+    Expires = "0"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+    X-Content-Type-Options = "nosniff" 

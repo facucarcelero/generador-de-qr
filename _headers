@@ -1,10 +1,27 @@
-# V4 - SOLUCIÓN DEFINITIVA: Headers para evitar cache
+# Headers para controlar caché y forzar actualizaciones
 /*
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
   Expires: 0
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
 
+# Headers específicos para index.html
 /index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  X-Content-Type-Options: nosniff
+
+# Headers para archivos JavaScript
+/*.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# Headers para archivos CSS
+/*.css
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
   Expires: 0 

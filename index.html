@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V12 - FIXED LOADING</title>
+    <title>Generador QR Los Nogales - V13 - NO AUTO REGENERATE</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1815,10 +1815,10 @@
             // Cargar QRs guardados al iniciar
             loadSavedQRs();
             
-            // Probar la generación de QR después de un breve delay
-            setTimeout(() => {
-                testQRGeneration();
-            }, 500);
+            // Comentado: No probar generación automáticamente para evitar regeneración
+            // setTimeout(() => {
+            //     testQRGeneration();
+            // }, 500);
             
             // Agregar event listeners para mejoras de UX
             window.addEventListener('scroll', handleScroll);
