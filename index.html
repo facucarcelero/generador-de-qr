@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V21 - COMPLETE DOM FIX</title>
+    <title>Generador QR Los Nogales - V22 - FIXED DOM ELEMENTS</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1827,19 +1827,39 @@
                 .then(() => {
                     console.log('QRCode library loaded successfully');
                     
-                    // Inicializar la aplicación después de cargar la biblioteca
-                    initializeApplication();
+                    // Esperar un poco más para asegurar que todos los elementos estén disponibles
+                    setTimeout(() => {
+                        // Inicializar la aplicación después de cargar la biblioteca
+                        initializeApplication();
+                    }, 100);
                 })
                 .catch((error) => {
                     console.error('Error cargando biblioteca QRCode:', error);
                     hideLibraryLoading(); // Asegurarse de ocultar el indicador de carga
-                    showLibraryError(error.message);
+                    // Solo mostrar error si document.body existe
+                    if (document.body) {
+                        showLibraryError(error.message);
+                    }
                 });
         });
 
         // Función para inicializar toda la aplicación
         function initializeApplication() {
             console.log('Inicializando aplicación...');
+            
+            // Verificar que los elementos principales existan antes de inicializar
+            const requiredElements = [
+                'foregroundColor', 'backgroundColor', 'foregroundHex', 'backgroundColorHex',
+                'quietZoneSize', 'qrUrl', 'qrTitle', 'qrSize', 'errorCorrection'
+            ];
+            
+            const missingElements = requiredElements.filter(id => !document.getElementById(id));
+            if (missingElements.length > 0) {
+                console.warn('Elementos faltantes, esperando...', missingElements);
+                // Reintentar después de un delay
+                setTimeout(initializeApplication, 200);
+                return;
+            }
             
             // Inicializar color pickers
             initializeColorPickers();
