@@ -3,11 +3,8 @@
 <head>
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V26 - FORCE CACHE CLEAR - 2024-07-28</title>
+    <title>Generador QR Los Nogales - V18 - RESTORED WORKING VERSION</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -189,41 +186,9 @@
         }
 
         function hideLibraryLoading() {
-            try {
-                // Solo ejecutar si el DOM está listo
-                if (document.readyState === 'loading') {
-                    return;
-                }
-                
-                const loadingDiv = document.getElementById('library-loading');
-                if (loadingDiv) {
-                    loadingDiv.remove();
-                }
-                
-                // También eliminar cualquier elemento con el texto de carga
-                try {
-                    const allElements = document.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        if (el.textContent && el.textContent.includes('Cargando biblioteca QRCode')) {
-                            if (el.style) {
-                                el.style.display = 'none';
-                            }
-                            el.remove();
-                        }
-                    });
-                } catch (error) {
-                    console.warn('Error al limpiar elementos de carga:', error);
-                }
-                
-                // Forzar el fondo correcto solo si document.body existe
-                if (document.body && document.body.style) {
-                    document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-                }
-                if (document.documentElement && document.documentElement.style) {
-                    document.documentElement.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-                }
-            } catch (error) {
-                console.warn('Error en hideLibraryLoading:', error);
+            const loadingDiv = document.getElementById('library-loading');
+            if (loadingDiv) {
+                loadingDiv.remove();
             }
         }
 
@@ -1816,41 +1781,21 @@
             return true;
         }
 
-        // Inicializar cuando la página esté completamente cargada
-        window.addEventListener('load', function() {
-            console.log('Página completamente cargada, inicializando aplicación...');
-            
-            // Timeout de seguridad para ocultar indicador de carga
-            setTimeout(() => {
-                hideLibraryLoading();
-            }, 3000);
+        // Inicializar cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando aplicación completa...');
             
             // Cargar la biblioteca QRCode primero
             loadQRCodeLibrary()
                 .then(() => {
                     console.log('QRCode library loaded successfully');
                     
-                    // Esperar un poco más para asegurar que el DOM esté completamente renderizado
-                    setTimeout(() => {
-                        // Verificar que los elementos principales existan
-                        const testElement = document.getElementById('qrUrl');
-                        if (testElement) {
-                            console.log('Elementos del DOM disponibles, inicializando aplicación...');
-                            initializeApplication();
-                        } else {
-                            console.warn('Elementos del DOM aún no disponibles, esperando...');
-                            // Reintentar después de un delay
-                            setTimeout(initializeApplication, 500);
-                        }
-                    }, 100);
+                    // Inicializar la aplicación después de cargar la biblioteca
+                    initializeApplication();
                 })
                 .catch((error) => {
                     console.error('Error cargando biblioteca QRCode:', error);
-                    hideLibraryLoading(); // Asegurarse de ocultar el indicador de carga
-                    // Solo mostrar error si document.body existe
-                    if (document.body) {
-                        showLibraryError(error.message);
-                    }
+                    showLibraryError(error.message);
                 });
         });
 
@@ -1962,38 +1907,6 @@
                 
                 document.body.appendChild(installButton);
             });
-        }
-
-        // Función para inicializar con elementos disponibles
-        function initializeWithAvailableElements() {
-            console.log('Inicializando con elementos disponibles...');
-            
-            // Inicializar solo los elementos que existan
-            try {
-                initializeColorPickers();
-            } catch (e) {
-                console.warn('Error inicializando color pickers:', e);
-            }
-            
-            try {
-                initializeQuietZoneControls();
-            } catch (e) {
-                console.warn('Error inicializando controles de quiet zone:', e);
-            }
-            
-            try {
-                initializeEventListeners();
-            } catch (e) {
-                console.warn('Error inicializando event listeners:', e);
-            }
-            
-            try {
-                loadSavedQRs();
-            } catch (e) {
-                console.warn('Error cargando QRs guardados:', e);
-            }
-            
-            console.log('Aplicación inicializada con elementos disponibles');
         }
 
         // Función para inicializar event listeners
