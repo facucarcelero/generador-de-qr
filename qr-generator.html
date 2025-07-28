@@ -34,52 +34,70 @@
     <script src="./qr-stats.js"></script>
     <script>
         // Función para cargar la biblioteca QRCode con múltiples fuentes
-        function loadQRCodeLibrary() {
-            return new Promise((resolve, reject) => {
-                        const sources = [
-            'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
-            'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-            'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js',
-            'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js',
-            'https://unpkg.com/qrcode@1.4.4/build/qrcode.min.js',
-            './qrcode.min.js', // Biblioteca local como última opción
-            'https://code.jquery.com/qrcode/1.5.3/qrcode.min.js'
-        ];
+        async function loadQRCodeLibrary() {
+            return new Promise(async (resolve, reject) => {
+                // Priorizar el archivo local para evitar problemas de CORS
+                const sources = [
+                    './qrcode.min.js', // Biblioteca local como primera opción
+                    'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js',
+                    'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js',
+                    'https://unpkg.com/qrcode@1.4.4/build/qrcode.min.js'
+                ];
                 
                 let currentSourceIndex = 0;
                 let attempts = 0;
                 const maxAttempts = sources.length;
                 
-                function tryNextSource() {
+                async function tryNextSource() {
                     if (currentSourceIndex >= sources.length) {
-                        // Intentar cargar una versión más antigua como último recurso
-                        console.log('Intentando cargar versión alternativa de QRCode...');
-                        loadAlternativeQRCode();
+                        console.error('No se pudo cargar la biblioteca QRCode desde ninguna fuente');
+                        hideLibraryLoading();
+                        reject(new Error('No se pudo cargar la biblioteca QRCode. Verifica tu conexión a internet.'));
                         return;
                     }
                     
                     attempts++;
-                    console.log(`Intento ${attempts}/${maxAttempts}: Cargando desde ${sources[currentSourceIndex]}`);
+                    const currentSource = sources[currentSourceIndex];
+                    console.log(`Intento ${attempts}/${maxAttempts}: Cargando desde ${currentSource}`);
+                    
+                    // Si es un archivo local, verificar primero si está disponible
+                    if (currentSource.startsWith('./')) {
+                        const isAvailable = await checkLocalFile(currentSource);
+                        if (!isAvailable) {
+                            console.warn(`Local file not available: ${currentSource}`);
+                            currentSourceIndex++;
+                            tryNextSource();
+                            return;
+                        }
+                    }
                     
                     const script = document.createElement('script');
-                    script.src = sources[currentSourceIndex];
+                    script.src = currentSource;
                     script.async = true;
-                    script.crossOrigin = 'anonymous';
+                    
+                    // Solo agregar crossOrigin para fuentes externas
+                    if (!currentSource.startsWith('./')) {
+                        script.crossOrigin = 'anonymous';
+                    }
                     
                     const timeout = setTimeout(() => {
-                        console.warn(`Timeout loading from: ${sources[currentSourceIndex]}`);
+                        console.warn(`Timeout loading from: ${currentSource}`);
                         script.onerror();
-                    }, 10000); // 10 segundos de timeout
+                    }, 5000); // Reducir timeout a 5 segundos
                     
                     script.onload = () => {
                         clearTimeout(timeout);
                         // Verificar si QRCode se cargó correctamente
                         if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
-                            console.log(`QRCode library loaded successfully from: ${sources[currentSourceIndex]}`);
+                            if (currentSource.startsWith('./')) {
+                                console.log(`✅ QRCode library loaded successfully from local file: ${currentSource}`);
+                            } else {
+                                console.log(`✅ QRCode library loaded successfully from CDN: ${currentSource}`);
+                            }
+                            hideLibraryLoading();
                             resolve();
                         } else {
-                            console.warn(`QRCode loaded from ${sources[currentSourceIndex]} but toCanvas method not available`);
+                            console.warn(`QRCode loaded from ${currentSource} but toCanvas method not available`);
                             currentSourceIndex++;
                             tryNextSource();
                         }
@@ -87,7 +105,7 @@
                     
                     script.onerror = () => {
                         clearTimeout(timeout);
-                        console.warn(`Failed to load from: ${sources[currentSourceIndex]}`);
+                        console.warn(`Failed to load from: ${currentSource}`);
                         currentSourceIndex++;
                         tryNextSource();
                     };
@@ -95,32 +113,34 @@
                     document.head.appendChild(script);
                 }
                 
-                // Función de respaldo para cargar una versión alternativa
-                function loadAlternativeQRCode() {
-                    console.log('Cargando versión alternativa de QRCode...');
-                    
-                    // Intentar cargar una versión más simple
-                    const alternativeScript = document.createElement('script');
-                    alternativeScript.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js';
-                    alternativeScript.async = true;
-                    
-                    alternativeScript.onload = () => {
-                        if (typeof QRCode !== 'undefined') {
-                            console.log('Alternative QRCode library loaded');
-                            resolve();
-                        } else {
-                            reject(new Error('No se pudo cargar la biblioteca QRCode desde ninguna fuente. Verifica tu conexión a internet.'));
-                        }
-                    };
-                    
-                    alternativeScript.onerror = () => {
-                        reject(new Error('No se pudo cargar la biblioteca QRCode desde ninguna fuente. Verifica tu conexión a internet.'));
-                    };
-                    
-                    document.head.appendChild(alternativeScript);
-                }
+
                 
+                // Mostrar indicador de carga
+                showLibraryLoading();
                 tryNextSource();
+            });
+        }
+
+        // Función para verificar si el archivo local está disponible
+        function checkLocalFile(url) {
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('HEAD', url, true);
+                xhr.timeout = 3000;
+                
+                xhr.onload = () => {
+                    resolve(xhr.status === 200);
+                };
+                
+                xhr.onerror = () => {
+                    resolve(false);
+                };
+                
+                xhr.ontimeout = () => {
+                    resolve(false);
+                };
+                
+                xhr.send();
             });
         }
 
