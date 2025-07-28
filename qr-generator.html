@@ -37,13 +37,13 @@
         function loadQRCodeLibrary() {
             return new Promise((resolve, reject) => {
                         const sources = [
-            './qrcode.min.js', // Biblioteca local como primera opción (1.4.4)
-            'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js',
-            'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js',
-            'https://unpkg.com/qrcode@1.4.4/build/qrcode.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
             'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
             'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js',
+            'https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js',
+            'https://unpkg.com/qrcode@1.4.4/build/qrcode.min.js',
+            './qrcode.min.js', // Biblioteca local como última opción
             'https://code.jquery.com/qrcode/1.5.3/qrcode.min.js'
         ];
                 
