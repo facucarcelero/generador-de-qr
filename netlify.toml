@@ -2,20 +2,34 @@
   publish = "."
   command = ""
 
+# V4 - SOLUCIÓN DEFINITIVA: Configuración agresiva para eliminar redirecciones
 [[redirects]]
   from = "/"
   to = "/index.html"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/qr-generator.html"
   to = "/"
   status = 301
+  force = true
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 404
+  force = true
 
+# Configuración adicional para forzar redeploy
 [build.environment]
-  NODE_VERSION = "18" 
+  NODE_VERSION = "18"
+  NETLIFY_USE_YARN = "false"
+
+# Headers para evitar cache
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0" 
