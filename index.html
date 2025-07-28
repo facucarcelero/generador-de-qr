@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V19 - FIXED LOADING INDICATOR</title>
+    <title>Generador QR Los Nogales - V20 - FIXED DOM ERROR</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -186,23 +186,36 @@
         }
 
         function hideLibraryLoading() {
+            // Solo ejecutar si el DOM está listo
+            if (document.readyState === 'loading') {
+                return;
+            }
+            
             const loadingDiv = document.getElementById('library-loading');
             if (loadingDiv) {
                 loadingDiv.remove();
             }
             
             // También eliminar cualquier elemento con el texto de carga
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(el => {
-                if (el.textContent && el.textContent.includes('Cargando biblioteca QRCode')) {
-                    el.style.display = 'none';
-                    el.remove();
-                }
-            });
+            try {
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(el => {
+                    if (el.textContent && el.textContent.includes('Cargando biblioteca QRCode')) {
+                        el.style.display = 'none';
+                        el.remove();
+                    }
+                });
+            } catch (error) {
+                console.warn('Error al limpiar elementos de carga:', error);
+            }
             
-            // Forzar el fondo correcto
-            document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-            document.documentElement.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            // Forzar el fondo correcto solo si document.body existe
+            if (document.body) {
+                document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            }
+            if (document.documentElement) {
+                document.documentElement.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            }
         }
 
                         // La biblioteca se cargará cuando el DOM esté listo
