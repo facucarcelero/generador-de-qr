@@ -3,8 +3,8 @@
 <head>
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- V4 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V5 - RESPONSIVE</title>
+    <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
+    <title>Generador QR Los Nogales - V6 - QR FIJO</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -937,18 +937,18 @@
         }
 
         /* Responsive Design - Mejorado */
-        @media (max-width: 1200px) {
+        @media (max-width: 1000px) {
             .main-container {
-                max-width: 1000px;
+                max-width: 900px;
                 gap: 2rem;
             }
             
             .qr-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
             .main-container {
                 grid-template-columns: 1fr;
                 gap: 2rem;
@@ -961,12 +961,12 @@
             }
 
             .qr-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
                 gap: 1.5rem;
             }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 700px) {
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
@@ -1043,7 +1043,7 @@
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 450px) {
             .header {
                 padding: 0.75rem;
             }
@@ -1133,7 +1133,7 @@
             }
         }
 
-        @media (max-width: 360px) {
+        @media (max-width: 350px) {
             .header-content {
                 padding: 0 0.25rem;
             }
@@ -1516,12 +1516,19 @@
                 <button class="btn btn-primary" onclick="generateQR()">
                     🔄 Generar QR
                 </button>
+                <button class="btn btn-secondary" onclick="regenerateQR()" id="regenerateBtn" style="display: none;">
+                    🔄 Regenerar QR
+                </button>
                 <button class="btn btn-secondary" onclick="downloadQR()">
                     💾 Descargar
                 </button>
                 <button class="btn btn-secondary" onclick="saveQR()">
                     💾 Guardar QR
                 </button>
+            </div>
+
+            <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 1rem; margin: 1rem 0; font-size: 0.9rem; color: #0c4a6e;">
+                <strong>💡 Nueva funcionalidad:</strong> Una vez generado el QR, este se mantiene fijo. Solo puedes modificar colores, tamaño y margen sin regenerar el código. Para cambiar la URL o regenerar completamente, usa el botón "Regenerar QR".
             </div>
 
             <div id="loading" class="loading">
@@ -2000,33 +2007,119 @@
                             background: options.colorLight
                         },
                         errorCorrection: document.getElementById('errorCorrection').value,
-                        timestamp: new Date().toISOString(),
-                        canvas: generatedCanvas
+                        quietZoneSize: quietZoneSize,
+                        qrText: qrText,
+                        isDemo: isDemo,
+                        timestamp: new Date().toISOString()
                     };
 
-                    // Para QR dinámicos, agregar información adicional
-                    if (qrType === 'dynamic') {
-                        const idForDynamicQR = currentQRData && currentQRData.id ? currentQRData.id : generateId();
-                        const qrNameForDynamic = document.getElementById('qrTitle').value.trim() || 'QR Dinámico';
-                        
-                        const encodedUrl = btoa(encodeURIComponent(url));
-                        const encodedName = btoa(encodeURIComponent(qrNameForDynamic));
-                        
-                        currentQRData.id = idForDynamicQR;
-                        currentQRData.redirectUrl = url; // Usar la URL directa
-                        currentQRData.encodedUrl = encodedUrl; // Guardar para estadísticas
-                        currentQRData.encodedName = encodedName; // Guardar para estadísticas
-                    }
-
-                    // Mostrar información
-                    updateQRInfo();
+                    // Mostrar botones de acción
+                    showActionButtons();
+                    
+                    // Mostrar información del QR
+                    showQRInfo();
+                    
+                    // Mostrar botón de regenerar y ocultar botón de generar
+                    document.getElementById('regenerateBtn').style.display = 'inline-flex';
+                    document.querySelector('.btn-primary').style.display = 'none';
+                    
                     showMessage('Código QR generado exitosamente', 'success');
                 });
             } catch (error) {
                 showLoading(false);
                 console.error('QR Generation exception:', error);
-                showMessage('Error inesperado al generar el QR: ' + error.message, 'error');
+                showMessage('Error inesperado al generar el código QR: ' + error.message, 'error');
             }
+        }
+
+        // Función para actualizar solo los colores del QR existente (sin regenerar)
+        function updateQRColors() {
+            if (!currentQRData || !currentQRData.qrText) {
+                showMessage('Primero debes generar un QR', 'error');
+                return;
+            }
+
+            const canvas = document.getElementById('qrContainer').querySelector('canvas');
+            if (!canvas) {
+                showMessage('No hay un QR generado para actualizar', 'error');
+                return;
+            }
+
+            const newForegroundColor = document.getElementById('foregroundColor').value;
+            const newBackgroundColor = document.getElementById('backgroundColor').value;
+
+            // Aplicar nuevos colores al canvas existente
+            colorizeQRCanvas(canvas, newForegroundColor, newBackgroundColor);
+
+            // Aplicar quiet zone si es necesario
+            const quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
+            if (quietZoneSize >= 0) {
+                applyQuietZoneToQR(canvas, quietZoneSize, newBackgroundColor);
+            }
+
+            // Actualizar datos del QR actual
+            currentQRData.colors = {
+                foreground: newForegroundColor,
+                background: newBackgroundColor
+            };
+            currentQRData.quietZoneSize = quietZoneSize;
+
+            showMessage('Colores del QR actualizados', 'success');
+        }
+
+        // Función para actualizar solo el tamaño del QR existente (sin regenerar)
+        function updateQRSize() {
+            if (!currentQRData || !currentQRData.qrText) {
+                showMessage('Primero debes generar un QR', 'error');
+                return;
+            }
+
+            const newSize = parseInt(document.getElementById('qrSize').value);
+            const container = document.getElementById('qrContainer');
+            const existingCanvas = container.querySelector('canvas');
+            
+            if (!existingCanvas) {
+                showMessage('No hay un QR generado para actualizar', 'error');
+                return;
+            }
+
+            // Crear un nuevo canvas con el tamaño actualizado
+            const newCanvas = document.createElement('canvas');
+            newCanvas.width = newSize;
+            newCanvas.height = newSize;
+            const ctx = newCanvas.getContext('2d');
+
+            // Escalar el QR existente al nuevo tamaño
+            ctx.drawImage(existingCanvas, 0, 0, newSize, newSize);
+
+            // Reemplazar el canvas anterior
+            container.innerHTML = '';
+            container.appendChild(newCanvas);
+
+            // Actualizar datos del QR actual
+            currentQRData.size = newSize;
+
+            showMessage('Tamaño del QR actualizado', 'success');
+        }
+
+        // Función para regenerar el QR completamente
+        function regenerateQR() {
+            // Limpiar datos actuales
+            currentQRData = null;
+            
+            // Ocultar botón de regenerar
+            document.getElementById('regenerateBtn').style.display = 'none';
+            
+            // Mostrar botón de generar
+            document.querySelector('.btn-primary').style.display = 'inline-flex';
+            
+            // Limpiar contenedor
+            document.getElementById('qrContainer').innerHTML = '<p style="color: #6b7280;">Ingresa una URL para generar el código QR</p>';
+            
+            // Ocultar información del QR
+            document.getElementById('qrInfo').style.display = 'none';
+            
+            showMessage('Listo para generar un nuevo QR', 'success');
         }
 
         function addLogoToQR(canvas, logoFile) {
@@ -2049,7 +2142,7 @@
             img.src = URL.createObjectURL(logoFile);
         }
 
-        function updateQRInfo() {
+        function showQRInfo() {
             if (!currentQRData) return;
 
             document.getElementById('currentUrl').textContent = currentQRData.url;
@@ -2372,13 +2465,14 @@
             const backgroundColorElement = document.getElementById('backgroundColor');
             
             if (foregroundColorElement) {
-                // Event listeners para color picker nativo
                 foregroundColorElement.addEventListener('change', function() {
                     const hexValue = this.value.toUpperCase();
                     console.log('Color principal cambiado a:', hexValue);
                     document.getElementById('foregroundHex').value = hexValue;
-                    // Generar QR siempre que cambie el color, independientemente de si hay URL
-                    generateQR();
+                    // Actualizar colores del QR existente en lugar de regenerar
+                    if (currentQRData && currentQRData.qrText) {
+                        updateQRColors();
+                    }
                 });
             } else {
                 console.error('Elemento foregroundColor no encontrado');
@@ -2389,8 +2483,10 @@
                     const hexValue = this.value.toUpperCase();
                     console.log('Color de fondo cambiado a:', hexValue);
                     document.getElementById('backgroundColorHex').value = hexValue;
-                    // Generar QR siempre que cambie el color, independientemente de si hay URL
-                    generateQR();
+                    // Actualizar colores del QR existente en lugar de regenerar
+                    if (currentQRData && currentQRData.qrText) {
+                        updateQRColors();
+                    }
                 });
             } else {
                 console.error('Elemento backgroundColor no encontrado');
@@ -2410,8 +2506,10 @@
                         hexValue = '#' + hexValue;
                         console.log('Color principal (hex) cambiado a:', hexValue);
                         document.getElementById('foregroundColor').value = hexValue;
-                        // Generar QR siempre que cambie el color, independientemente de si hay URL
-                        generateQR();
+                        // Actualizar colores del QR existente en lugar de regenerar
+                        if (currentQRData && currentQRData.qrText) {
+                            updateQRColors();
+                        }
                     }
                 });
             } else {
@@ -2428,8 +2526,10 @@
                         hexValue = '#' + hexValue;
                         console.log('Color de fondo (hex) cambiado a:', hexValue);
                         document.getElementById('backgroundColor').value = hexValue;
-                        // Generar QR siempre que cambie el color, independientemente de si hay URL
-                        generateQR();
+                        // Actualizar colores del QR existente en lugar de regenerar
+                        if (currentQRData && currentQRData.qrText) {
+                            updateQRColors();
+                        }
                     }
                 });
             } else {
@@ -2437,24 +2537,27 @@
             }
         }
 
-                            // Funcionalidad de controles de quiet zone
-                    function initializeQuietZoneControls() {
-                        console.log('Inicializando controles de quiet zone...');
-                        
-                        const quietZoneSizeElement = document.getElementById('quietZoneSize');
-                        const quietZoneSizeValueElement = document.getElementById('quietZoneSizeValue');
-                        
-                        if (quietZoneSizeElement) {
-                            quietZoneSizeElement.addEventListener('input', function() {
-                                const size = this.value;
-                                console.log('Tamaño de quiet zone cambiado a:', size + 'px');
-                                quietZoneSizeValueElement.textContent = size + 'px';
-                                generateQR();
-                            });
-                        } else {
-                            console.error('Elemento quietZoneSize no encontrado');
-                        }
+        // Funcionalidad de controles de quiet zone
+        function initializeQuietZoneControls() {
+            console.log('Inicializando controles de quiet zone...');
+            
+            const quietZoneSizeElement = document.getElementById('quietZoneSize');
+            const quietZoneSizeValueElement = document.getElementById('quietZoneSizeValue');
+            
+            if (quietZoneSizeElement) {
+                quietZoneSizeElement.addEventListener('input', function() {
+                    const size = this.value;
+                    console.log('Tamaño de quiet zone cambiado a:', size + 'px');
+                    quietZoneSizeValueElement.textContent = size + 'px';
+                    // Actualizar colores del QR existente en lugar de regenerar
+                    if (currentQRData && currentQRData.qrText) {
+                        updateQRColors();
                     }
+                });
+            } else {
+                console.error('Elemento quietZoneSize no encontrado');
+            }
+        }
 
         // Inicializar todos los event listeners cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
@@ -2467,8 +2570,8 @@
                 // Inicializar color pickers
                 initializeColorPickers();
                 
-                                        // Inicializar controles de quiet zone
-                        initializeQuietZoneControls();
+                // Inicializar controles de quiet zone
+                initializeQuietZoneControls();
                 
                 // Event listeners para URL y nombre
                 const qrUrlElement = document.getElementById('qrUrl');
@@ -2477,6 +2580,7 @@
                 if (qrUrlElement) {
                     qrUrlElement.addEventListener('input', function() {
                         if (this.value.trim()) {
+                            // Solo regenerar QR cuando cambie la URL
                             setTimeout(generateQR, 500);
                         }
                     });
@@ -2486,7 +2590,11 @@
                 
                 if (qrNameElement) {
                     qrNameElement.addEventListener('input', function() {
-                        generateQR();
+                        // Solo actualizar el nombre, no regenerar QR
+                        if (currentQRData) {
+                            currentQRData.title = this.value.trim() || 'QR sin título';
+                            showQRInfo();
+                        }
                     });
                 } else {
                     console.error('Elemento qrTitle no encontrado');
@@ -2499,7 +2607,10 @@
                 if (qrSizeElement) {
                     qrSizeElement.addEventListener('change', function() {
                         console.log('Tamaño cambiado a:', this.value);
-                        generateQR();
+                        // Actualizar tamaño del QR existente en lugar de regenerar
+                        if (currentQRData && currentQRData.qrText) {
+                            updateQRSize();
+                        }
                     });
                 } else {
                     console.error('Elemento qrSize no encontrado');
@@ -2508,7 +2619,10 @@
                 if (errorCorrectionElement) {
                     errorCorrectionElement.addEventListener('change', function() {
                         console.log('Corrección de errores cambiada a:', this.value);
-                        generateQR();
+                        // Solo actualizar el valor, no regenerar QR
+                        if (currentQRData) {
+                            currentQRData.errorCorrection = this.value;
+                        }
                     });
                 } else {
                     console.error('Elemento errorCorrection no encontrado');
@@ -2693,161 +2807,161 @@
             } : { r: 0, g: 0, b: 0 };
         }
 
-                                // Función para aplicar quiet zone personalizado al QR
-                        function applyQuietZoneToQR(canvas, quietZoneSize, qrLightColor) {
-                            const ctx = canvas.getContext('2d');
-                            const originalWidth = canvas.width;
-                            const originalHeight = canvas.height;
-                            
-                            if (quietZoneSize <= 0) {
-                                // Si no hay espacio, el QR debe llenar completamente el canvas
-                                // Convertir qrLightColor a valores RGB
-                                let lightR, lightG, lightB;
-                                if (qrLightColor.startsWith('#')) {
-                                    const hex = qrLightColor.slice(1);
-                                    lightR = parseInt(hex.substring(0, 2), 16);
-                                    lightG = parseInt(hex.substring(2, 4), 16);
-                                    lightB = parseInt(hex.substring(4, 6), 16);
-                                } else if (qrLightColor.startsWith('rgb')) {
-                                    const rgb = qrLightColor.match(/\d+/g).map(Number);
-                                    lightR = rgb[0];
-                                    lightG = rgb[1];
-                                    lightB = rgb[2];
-                                } else {
-                                    lightR = 255; lightG = 255; lightB = 255;
-                                }
-                                
-                                // Obtener los datos de imagen actuales
-                                const imageData = ctx.getImageData(0, 0, originalWidth, originalHeight);
-                                const data = imageData.data;
-                                
-                                // Encontrar los límites del QR (dónde empieza y termina el patrón oscuro)
-                                let minX = originalWidth, minY = originalHeight, maxX = 0, maxY = 0;
-                                
-                                for (let y = 0; y < originalHeight; y++) {
-                                    for (let x = 0; x < originalWidth; x++) {
-                                        const index = (y * originalWidth + x) * 4;
-                                        // Si el píxel NO es el color claro (es parte del patrón oscuro)
-                                        if (!(data[index] === lightR && data[index + 1] === lightG && data[index + 2] === lightB)) {
-                                            minX = Math.min(minX, x);
-                                            minY = Math.min(minY, y);
-                                            maxX = Math.max(maxX, x);
-                                            maxY = Math.max(maxY, y);
-                                        }
-                                    }
-                                }
-                                
-                                // Si no se encontraron píxeles oscuros, retornar
-                                if (minX === originalWidth) {
-                                    console.log('No se encontraron píxeles oscuros en el QR');
-                                    return;
-                                }
-                                
-                                // Calcular las dimensiones del QR real (solo el patrón)
-                                const qrWidth = maxX - minX + 1;
-                                const qrHeight = maxY - minY + 1;
-                                
-                                // Crear un nuevo canvas del mismo tamaño
-                                const newCanvas = document.createElement('canvas');
-                                newCanvas.width = originalWidth;
-                                newCanvas.height = originalHeight;
-                                const newCtx = newCanvas.getContext('2d');
-                                
-                                // Llenar todo el canvas con el color de fondo del QR
-                                newCtx.fillStyle = qrLightColor;
-                                newCtx.fillRect(0, 0, originalWidth, originalHeight);
-                                
-                                // Calcular el factor de escala para que el QR llene todo el canvas
-                                const scaleX = originalWidth / qrWidth;
-                                const scaleY = originalHeight / qrHeight;
-                                const scale = Math.min(scaleX, scaleY);
-                                
-                                // Calcular las nuevas dimensiones del QR expandido
-                                const scaledWidth = qrWidth * scale;
-                                const scaledHeight = qrHeight * scale;
-                                
-                                // Calcular la posición centrada
-                                const offsetX = (originalWidth - scaledWidth) / 2;
-                                const offsetY = (originalHeight - scaledHeight) / 2;
-                                
-                                // Crear un canvas temporal con solo el QR
-                                const tempCanvas = document.createElement('canvas');
-                                tempCanvas.width = qrWidth;
-                                tempCanvas.height = qrHeight;
-                                const tempCtx = tempCanvas.getContext('2d');
-                                
-                                // Copiar solo la parte del QR al canvas temporal
-                                const qrImageData = ctx.getImageData(minX, minY, qrWidth, qrHeight);
-                                tempCtx.putImageData(qrImageData, 0, 0);
-                                
-                                // Dibujar el QR expandido en el nuevo canvas
-                                newCtx.drawImage(tempCanvas, offsetX, offsetY, scaledWidth, scaledHeight);
-                                
-                                // Reemplazar el canvas original
-                                ctx.clearRect(0, 0, originalWidth, originalHeight);
-                                ctx.drawImage(newCanvas, 0, 0);
-                                
-                                console.log('QR expandido para llenar todo el canvas con fondo de color claro');
-                                return;
-                            }
-                            
-                            // Para espacios muy pequeños (1-5px), usar un enfoque más sutil
-                            if (quietZoneSize <= 5) {
-                                // En lugar de agregar espacio, reducir ligeramente el QR para crear el efecto de "casi sin fondo"
-                                const reductionFactor = quietZoneSize / 5; // 0.2 para 1px, 0.4 para 2px, etc.
-                                const reduction = Math.floor(originalWidth * reductionFactor * 0.1); // Máximo 10% de reducción
-                                
-                                // Crear un nuevo canvas del mismo tamaño
-                                const newCanvas = document.createElement('canvas');
-                                newCanvas.width = originalWidth;
-                                newCanvas.height = originalHeight;
-                                const newCtx = newCanvas.getContext('2d');
-                                
-                                // Llenar con el color de fondo del QR
-                                newCtx.fillStyle = qrLightColor;
-                                newCtx.fillRect(0, 0, originalWidth, originalHeight);
-                                
-                                // Dibujar el QR ligeramente más pequeño y centrado
-                                const newWidth = originalWidth - (reduction * 2);
-                                const newHeight = originalHeight - (reduction * 2);
-                                const offsetX = reduction;
-                                const offsetY = reduction;
-                                
-                                newCtx.drawImage(canvas, offsetX, offsetY, newWidth, newHeight);
-                                
-                                // Reemplazar el canvas original
-                                ctx.clearRect(0, 0, originalWidth, originalHeight);
-                                ctx.drawImage(newCanvas, 0, 0);
-                                
-                                console.log('Quiet zone sutil aplicado al QR:', { size: quietZoneSize, reduction });
-                                return;
-                            }
-                            
-                            // Para espacios más grandes, usar el método tradicional
-                            // Crear un nuevo canvas con espacio para el quiet zone
-                            const newCanvas = document.createElement('canvas');
-                            newCanvas.width = originalWidth + (quietZoneSize * 2);
-                            newCanvas.height = originalHeight + (quietZoneSize * 2);
-                            const newCtx = newCanvas.getContext('2d');
-                            
-                            // Obtener el color de fondo actual del QR
-                            const imageData = ctx.getImageData(0, 0, 1, 1);
-                            const backgroundColor = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
-                            
-                            // Dibujar el fondo del quiet zone con el mismo color que el fondo del QR
-                            newCtx.fillStyle = backgroundColor;
-                            newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-                            
-                            // Copiar el QR original al centro del nuevo canvas
-                            newCtx.drawImage(canvas, quietZoneSize, quietZoneSize);
-                            
-                            // Reemplazar el canvas original con el nuevo
-                            canvas.width = newCanvas.width;
-                            canvas.height = newCanvas.height;
-                            ctx.drawImage(newCanvas, 0, 0);
-                            
-                            console.log('Quiet zone aplicado al QR:', { size: quietZoneSize });
+        // Función para aplicar quiet zone personalizado al QR
+        function applyQuietZoneToQR(canvas, quietZoneSize, qrLightColor) {
+            const ctx = canvas.getContext('2d');
+            const originalWidth = canvas.width;
+            const originalHeight = canvas.height;
+            
+            if (quietZoneSize <= 0) {
+                // Si no hay espacio, el QR debe llenar completamente el canvas
+                // Convertir qrLightColor a valores RGB
+                let lightR, lightG, lightB;
+                if (qrLightColor.startsWith('#')) {
+                    const hex = qrLightColor.slice(1);
+                    lightR = parseInt(hex.substring(0, 2), 16);
+                    lightG = parseInt(hex.substring(2, 4), 16);
+                    lightB = parseInt(hex.substring(4, 6), 16);
+                } else if (qrLightColor.startsWith('rgb')) {
+                    const rgb = qrLightColor.match(/\d+/g).map(Number);
+                    lightR = rgb[0];
+                    lightG = rgb[1];
+                    lightB = rgb[2];
+                } else {
+                    lightR = 255; lightG = 255; lightB = 255;
+                }
+                
+                // Obtener los datos de imagen actuales
+                const imageData = ctx.getImageData(0, 0, originalWidth, originalHeight);
+                const data = imageData.data;
+                
+                // Encontrar los límites del QR (dónde empieza y termina el patrón oscuro)
+                let minX = originalWidth, minY = originalHeight, maxX = 0, maxY = 0;
+                
+                for (let y = 0; y < originalHeight; y++) {
+                    for (let x = 0; x < originalWidth; x++) {
+                        const index = (y * originalWidth + x) * 4;
+                        // Si el píxel NO es el color claro (es parte del patrón oscuro)
+                        if (!(data[index] === lightR && data[index + 1] === lightG && data[index + 2] === lightB)) {
+                            minX = Math.min(minX, x);
+                            minY = Math.min(minY, y);
+                            maxX = Math.max(maxX, x);
+                            maxY = Math.max(maxY, y);
                         }
+                    }
+                }
+                
+                // Si no se encontraron píxeles oscuros, retornar
+                if (minX === originalWidth) {
+                    console.log('No se encontraron píxeles oscuros en el QR');
+                    return;
+                }
+                
+                // Calcular las dimensiones del QR real (solo el patrón)
+                const qrWidth = maxX - minX + 1;
+                const qrHeight = maxY - minY + 1;
+                
+                // Crear un nuevo canvas del mismo tamaño
+                const newCanvas = document.createElement('canvas');
+                newCanvas.width = originalWidth;
+                newCanvas.height = originalHeight;
+                const newCtx = newCanvas.getContext('2d');
+                
+                // Llenar todo el canvas con el color de fondo del QR
+                newCtx.fillStyle = qrLightColor;
+                newCtx.fillRect(0, 0, originalWidth, originalHeight);
+                
+                // Calcular el factor de escala para que el QR llene todo el canvas
+                const scaleX = originalWidth / qrWidth;
+                const scaleY = originalHeight / qrHeight;
+                const scale = Math.min(scaleX, scaleY);
+                
+                // Calcular las nuevas dimensiones del QR expandido
+                const scaledWidth = qrWidth * scale;
+                const scaledHeight = qrHeight * scale;
+                
+                // Calcular la posición centrada
+                const offsetX = (originalWidth - scaledWidth) / 2;
+                const offsetY = (originalHeight - scaledHeight) / 2;
+                
+                // Crear un canvas temporal con solo el QR
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = qrWidth;
+                tempCanvas.height = qrHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Copiar solo la parte del QR al canvas temporal
+                const qrImageData = ctx.getImageData(minX, minY, qrWidth, qrHeight);
+                tempCtx.putImageData(qrImageData, 0, 0);
+                
+                // Dibujar el QR expandido en el nuevo canvas
+                newCtx.drawImage(tempCanvas, offsetX, offsetY, scaledWidth, scaledHeight);
+                
+                // Reemplazar el canvas original
+                ctx.clearRect(0, 0, originalWidth, originalHeight);
+                ctx.drawImage(newCanvas, 0, 0);
+                
+                console.log('QR expandido para llenar todo el canvas con fondo de color claro');
+                return;
+            }
+            
+            // Para espacios muy pequeños (1-5px), usar un enfoque más sutil
+            if (quietZoneSize <= 5) {
+                // En lugar de agregar espacio, reducir ligeramente el QR para crear el efecto de "casi sin fondo"
+                const reductionFactor = quietZoneSize / 5; // 0.2 para 1px, 0.4 para 2px, etc.
+                const reduction = Math.floor(originalWidth * reductionFactor * 0.1); // Máximo 10% de reducción
+                
+                // Crear un nuevo canvas del mismo tamaño
+                const newCanvas = document.createElement('canvas');
+                newCanvas.width = originalWidth;
+                newCanvas.height = originalHeight;
+                const newCtx = newCanvas.getContext('2d');
+                
+                // Llenar con el color de fondo del QR
+                newCtx.fillStyle = qrLightColor;
+                newCtx.fillRect(0, 0, originalWidth, originalHeight);
+                
+                // Dibujar el QR ligeramente más pequeño y centrado
+                const newWidth = originalWidth - (reduction * 2);
+                const newHeight = originalHeight - (reduction * 2);
+                const offsetX = reduction;
+                const offsetY = reduction;
+                
+                newCtx.drawImage(canvas, offsetX, offsetY, newWidth, newHeight);
+                
+                // Reemplazar el canvas original
+                ctx.clearRect(0, 0, originalWidth, originalHeight);
+                ctx.drawImage(newCanvas, 0, 0);
+                
+                console.log('Quiet zone sutil aplicado al QR:', { size: quietZoneSize, reduction });
+                return;
+            }
+            
+            // Para espacios más grandes, usar el método tradicional
+            // Crear un nuevo canvas con espacio para el quiet zone
+            const newCanvas = document.createElement('canvas');
+            newCanvas.width = originalWidth + (quietZoneSize * 2);
+            newCanvas.height = originalHeight + (quietZoneSize * 2);
+            const newCtx = newCanvas.getContext('2d');
+            
+            // Obtener el color de fondo actual del QR
+            const imageData = ctx.getImageData(0, 0, 1, 1);
+            const backgroundColor = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
+            
+            // Dibujar el fondo del quiet zone con el mismo color que el fondo del QR
+            newCtx.fillStyle = backgroundColor;
+            newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+            
+            // Copiar el QR original al centro del nuevo canvas
+            newCtx.drawImage(canvas, quietZoneSize, quietZoneSize);
+            
+            // Reemplazar el canvas original con el nuevo
+            canvas.width = newCanvas.width;
+            canvas.height = newCanvas.height;
+            ctx.drawImage(newCanvas, 0, 0);
+            
+            console.log('Quiet zone aplicado al QR:', { size: quietZoneSize });
+        }
 
         // Funciones para el menú móvil y mejoras de UX
         function toggleMobileMenu() {
