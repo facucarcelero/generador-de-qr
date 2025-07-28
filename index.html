@@ -1435,6 +1435,21 @@
                     console.log('🎨 Fondo corregido');
                 }
                 
+                // Forzar corrección del fondo azul de manera más agresiva
+                if (document.body) {
+                    document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                    document.body.style.backgroundColor = 'transparent';
+                }
+                if (document.documentElement) {
+                    document.documentElement.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                    document.documentElement.style.backgroundColor = 'transparent';
+                }
+                
+                // Asegurar que el HTML también tenga el fondo correcto
+                if (document.documentElement) {
+                    document.documentElement.style.cssText += '; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;';
+                }
+                
                 // Mostrar el contenido principal si está oculto
                 const mainContent = document.querySelector('.main-container');
                 if (mainContent && mainContent.style.display === 'none') {
