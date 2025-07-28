@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V8 - GUARDAR CAMBIOS</title>
+    <title>Generador QR Los Nogales - V9 - BOTÓN GUARDAR CAMBIOS FIXED</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -2431,8 +2431,37 @@
             document.getElementById('backgroundColorHex').value = qr.colors?.background || '#FFFFFF';
             document.getElementById('errorCorrection').value = qr.errorCorrection || 'M';
 
-            // Generar QR con los datos cargados
-            generateQR();
+            // Cargar el QR existente en lugar de regenerarlo
+            if (qr.imageData) {
+                const container = document.getElementById('qrContainer');
+                container.innerHTML = `<img src="${qr.imageData}" style="max-width: 100%; height: auto;">`;
+                
+                // Configurar datos del QR actual
+                currentQRData = {
+                    url: qr.originalUrl || qr.url,
+                    qrType: qr.type || 'static',
+                    title: qr.name,
+                    size: qr.size || 300,
+                    colors: qr.colors || { foreground: '#000000', background: '#FFFFFF' },
+                    errorCorrection: qr.errorCorrection || 'M',
+                    timestamp: qr.timestamp,
+                    qrText: qr.originalUrl || qr.url,
+                    isDemo: false
+                };
+
+                // Mostrar botones de acción
+                document.getElementById('regenerateBtn').style.display = 'inline-flex';
+                document.querySelector('.btn-primary').style.display = 'none';
+                document.getElementById('saveChangesBtn').style.display = 'none';
+
+                // Mostrar información del QR
+                showQRInfo();
+                
+                showMessage('QR cargado para edición. Modifica los parámetros y usa "Guardar Cambios" para actualizar.', 'success');
+            } else {
+                // Si no hay imagen guardada, generar el QR
+                generateQR();
+            }
         }
 
         function downloadSavedQR(qrId) {
@@ -2751,8 +2780,8 @@
                     testDiv.appendChild(generatedCanvas);
                 });
                 
-                // También generar el QR normal
-                generateQR();
+                // Comentado: No generar QR automáticamente al cargar la página
+                // generateQR();
                 
             }).catch(error => {
                 console.error('Error al cargar la librería QRCode:', error);
