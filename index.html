@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V17 - FIXED BLANK PAGE</title>
+    <title>Generador QR Los Nogales - V18 - RESTORED WORKING VERSION</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -34,38 +34,6 @@
     <!-- QR Code library -->
     <script src="qr-stats.js"></script>
     <script>
-        // Script inmediato para arreglar el layout - VERSIÓN CORREGIDA
-        (function() {
-            // Ocultar solo el indicador de carga específico
-            function hideLoadingIndicator() {
-                // Solo eliminar elementos con ID específico
-                const loadingDiv = document.getElementById('library-loading');
-                if (loadingDiv) {
-                    loadingDiv.remove();
-                }
-                
-                // Solo eliminar elementos con clases específicas
-                const loadingElements = document.querySelectorAll('.loading-overlay, .library-loading');
-                loadingElements.forEach(el => el.remove());
-                
-                // NO eliminar elementos por texto para evitar eliminar contenido importante
-            }
-            
-            // Ejecutar inmediatamente
-            hideLoadingIndicator();
-            
-            // Y también cuando el DOM esté listo
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', hideLoadingIndicator);
-            } else {
-                hideLoadingIndicator();
-            }
-            
-            // Y también después de un delay
-            setTimeout(hideLoadingIndicator, 100);
-            setTimeout(hideLoadingIndicator, 500);
-        })();
-        
         // V4 - SOLUCIÓN DEFINITIVA: Cargar biblioteca QRCode
         async function loadQRCodeLibrary() {
             return new Promise(async (resolve, reject) => {
@@ -222,9 +190,6 @@
             if (loadingDiv) {
                 loadingDiv.remove();
             }
-            // También ocultar cualquier overlay de carga que pueda estar causando problemas
-            const overlays = document.querySelectorAll('.loading-overlay, .library-loading');
-            overlays.forEach(overlay => overlay.remove());
         }
 
                         // La biblioteca se cargará cuando el DOM esté listo
@@ -243,20 +208,6 @@
             color: #333333;
             min-height: 100vh;
             line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* Asegurar que el fondo se vea correctamente en todos los dispositivos */
-        html {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-        }
-
-        /* Forzar el fondo en todos los elementos principales */
-        .main-container, .form-section, .preview-section {
-            background: transparent;
         }
 
         /* Header */
@@ -1834,11 +1785,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM cargado, inicializando aplicación completa...');
             
-            // Timeout de seguridad para ocultar indicador de carga
-            setTimeout(() => {
-                hideLibraryLoading();
-            }, 5000);
-            
             // Cargar la biblioteca QRCode primero
             loadQRCodeLibrary()
                 .then(() => {
@@ -1849,7 +1795,6 @@
                 })
                 .catch((error) => {
                     console.error('Error cargando biblioteca QRCode:', error);
-                    hideLibraryLoading(); // Asegurarse de ocultar el indicador de carga
                     showLibraryError(error.message);
                 });
         });
@@ -1857,9 +1802,6 @@
         // Función para inicializar toda la aplicación
         function initializeApplication() {
             console.log('Inicializando aplicación...');
-            
-            // Asegurarse de que el indicador de carga se oculte
-            hideLibraryLoading();
             
             // Inicializar color pickers
             initializeColorPickers();
