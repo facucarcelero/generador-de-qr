@@ -1236,10 +1236,9 @@
                 return;
             }
 
-            if (!url) {
-                showMessage('Por favor ingresa una URL válida', 'error');
-                return;
-            }
+            // Si no hay URL, usar un texto de demostración para mostrar los colores
+            let qrText = url || 'https://ejemplo.com';
+            let isDemo = !url;
 
             // Verificar si la biblioteca QRCode está disponible
             if (typeof QRCode === 'undefined') {
@@ -1256,8 +1255,7 @@
             showLoading(true);
             
             // Para QRs dinámicos, generar URL de redirección
-            let qrText = url;
-            if (qrType === 'dynamic') {
+            if (qrType === 'dynamic' && !isDemo) {
                 // Usar el ID del QR actual si existe (para edición), o generar uno nuevo
                 // Para QR dinámicos, usar la URL directa del usuario con parámetros de estadísticas
                 const idForDynamicQR = currentQRData && currentQRData.id ? currentQRData.id : generateId();
@@ -1693,17 +1691,15 @@
             document.getElementById('foregroundColor').addEventListener('change', function() {
                 const hexValue = this.value.toUpperCase();
                 document.getElementById('foregroundHex').value = hexValue;
-                if (document.getElementById('qrUrl').value.trim()) {
-                    generateQR();
-                }
+                // Generar QR siempre que cambie el color, independientemente de si hay URL
+                generateQR();
             });
 
             document.getElementById('backgroundColor').addEventListener('change', function() {
                 const hexValue = this.value.toUpperCase();
                 document.getElementById('backgroundColorHex').value = hexValue;
-                if (document.getElementById('qrUrl').value.trim()) {
-                    generateQR();
-                }
+                // Generar QR siempre que cambie el color, independientemente de si hay URL
+                generateQR();
             });
 
             // Event listeners para input de código hex
@@ -1715,9 +1711,8 @@
                 if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
                     hexValue = '#' + hexValue;
                     document.getElementById('foregroundColor').value = hexValue;
-                    if (document.getElementById('qrUrl').value.trim()) {
-                        generateQR();
-                    }
+                    // Generar QR siempre que cambie el color, independientemente de si hay URL
+                    generateQR();
                 }
             });
 
@@ -1729,9 +1724,8 @@
                 if (hexValue.length === 6 && /^[0-9A-F]{6}$/.test(hexValue)) {
                     hexValue = '#' + hexValue;
                     document.getElementById('backgroundColor').value = hexValue;
-                    if (document.getElementById('qrUrl').value.trim()) {
-                        generateQR();
-                    }
+                    // Generar QR siempre que cambie el color, independientemente de si hay URL
+                    generateQR();
                 }
             });
         }
@@ -1742,15 +1736,13 @@
         });
 
         document.getElementById('qrSize').addEventListener('change', function() {
-            if (document.getElementById('qrUrl').value.trim()) {
-                generateQR();
-            }
+            // Generar QR siempre que cambie el tamaño, independientemente de si hay URL
+            generateQR();
         });
 
         document.getElementById('errorCorrection').addEventListener('change', function() {
-            if (document.getElementById('qrUrl').value.trim()) {
-                generateQR();
-            }
+            // Generar QR siempre que cambie la corrección de errores, independientemente de si hay URL
+            generateQR();
         });
 
         // Cerrar modal al hacer clic fuera
