@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirección QR Dinámica - Parrilla Los Nogales</title>
+    <link rel="icon" type="image/x-icon" href="./Logo/favicon.ico">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #333333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .qr-id {
+            font-size: 1.5em;
+            color: #10b981;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #dcfce7;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .redirect-info {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .redirect-info h3 {
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+
+        .redirect-info p {
+            margin-bottom: 10px;
+            color: #6b7280;
+        }
+
+        .redirect-info a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .redirect-info a:hover {
+            text-decoration: underline;
+        }
+
+        .redirect-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+        }
+
+        .redirect-button:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+        }
+
+        .back-button {
+            display: inline-block;
+            background: #f3f4f6;
+            color: #374151;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            border: 1px solid #d1d5db;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #e5e7eb;
+        }
+
+        .loading {
+            color: #10b981;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .error {
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .stats {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stats h3 {
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-label {
+            color: #6b7280;
+        }
+
+        .stat-value {
+            color: #111827;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .qr-id {
+                font-size: 1.2em;
+            }
+
+            .redirect-button {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem; font-weight: bold;">QR</div>
+        <h1>Redirección QR Dinámica</h1>
+        
+        <div id="loading" class="loading">
+            <p>Cargando información del código QR...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="qr-id" id="qrId"></div>
+            
+            <div class="redirect-info">
+                <h3>📱 Información de Redirección</h3>
+                <p><strong>Destino actual:</strong></p>
+                <a href="#" id="currentUrl" target="_blank"></a>
+                <p><strong>Última actualización:</strong> <span id="lastUpdate"></span></p>
+                <p><strong>Total de visitas:</strong> <span id="visitCount"></span></p>
+            </div>
+
+            <div class="redirect-button" id="redirectButton">
+                🔗 Ir al Destino
+            </div>
+
+            <div class="stats">
+                <h3>📊 Estadísticas</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Código QR ID:</span>
+                    <span class="stat-value" id="statId"></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Estado:</span>
+                    <span class="stat-value" id="statStatus"></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Creado:</span>
+                    <span class="stat-value" id="statCreated"></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Última visita:</span>
+                    <span class="stat-value" id="statLastVisit"></span>
+                </div>
+            </div>
+
+            <a href="./qr-generator.html" class="back-button">← Volver al Generador</a>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            <h3>❌ Error</h3>
+            <p id="errorMessage"></p>
+            <a href="./qr-generator.html" class="back-button">← Volver al Generador</a>
+        </div>
+    </div>
+
+    <script>
+        // Obtener parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const qrId = urlParams.get('id');
+        const encodedUrl = urlParams.get('url');
+        const encodedName = urlParams.get('name');
+
+        if (!qrId || !encodedUrl || !encodedName) {
+            showError('Parámetros de código QR incompletos');
+        } else {
+            loadQRData();
+        }
+
+        function loadQRData() {
+            // Simular carga de datos
+            setTimeout(() => {
+                try {
+                    // Decodificar los parámetros
+                    const originalUrl = decodeURIComponent(atob(encodedUrl));
+                    const qrName = decodeURIComponent(atob(encodedName));
+                    
+                    const qrData = {
+                        id: qrId,
+                        name: qrName,
+                        url: originalUrl,
+                        timestamp: new Date().toISOString(),
+                        visitCount: getVisitCount(qrId),
+                        lastVisit: getLastVisit(qrId),
+                        created: new Date().toISOString(),
+                        status: 'Activo'
+                    };
+                    
+                    displayQRData(qrData);
+                    updateVisitCount(qrId);
+                } catch (error) {
+                    showError('Error al procesar los datos del código QR');
+                }
+            }, 1000);
+        }
+
+        function getVisitCount(id) {
+            const stats = JSON.parse(localStorage.getItem(`qr_stats_${id}`) || '{}');
+            return stats.visitCount || 0;
+        }
+
+        function getLastVisit(id) {
+            const stats = JSON.parse(localStorage.getItem(`qr_stats_${id}`) || '{}');
+            return stats.lastVisit || null;
+        }
+
+        function displayQRData(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            document.getElementById('qrId').textContent = `QR-${data.id}`;
+            document.getElementById('currentUrl').textContent = data.url;
+            document.getElementById('currentUrl').href = data.url;
+            document.getElementById('lastUpdate').textContent = new Date(data.timestamp).toLocaleString('es-ES');
+            document.getElementById('visitCount').textContent = data.visitCount;
+            
+            // Configurar botón de redirección
+            document.getElementById('redirectButton').href = data.url;
+            
+            // Mostrar estadísticas
+            document.getElementById('statId').textContent = data.id;
+            document.getElementById('statStatus').textContent = data.status;
+            document.getElementById('statCreated').textContent = new Date(data.created).toLocaleDateString('es-ES');
+            document.getElementById('statLastVisit').textContent = data.lastVisit ? 
+                new Date(data.lastVisit).toLocaleString('es-ES') : 'Nunca';
+        }
+
+        function updateVisitCount(id) {
+            const stats = JSON.parse(localStorage.getItem(`qr_stats_${id}`) || '{}');
+            stats.visitCount = (stats.visitCount || 0) + 1;
+            stats.lastVisit = new Date().toISOString();
+            localStorage.setItem(`qr_stats_${id}`, JSON.stringify(stats));
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // Redirección automática después de 3 segundos (opcional)
+        let redirectTimer = null;
+        
+        document.getElementById('redirectButton').addEventListener('click', function(e) {
+            // Cancelar redirección automática si el usuario hace clic manualmente
+            if (redirectTimer) {
+                clearTimeout(redirectTimer);
+            }
+        });
+
+        // Configurar redirección automática
+        setTimeout(() => {
+            const currentUrl = document.getElementById('currentUrl').href;
+            if (currentUrl && currentUrl !== '#') {
+                redirectTimer = setTimeout(() => {
+                    window.location.href = currentUrl;
+                }, 3000);
+                
+                // Mostrar contador
+                let countdown = 3;
+                const button = document.getElementById('redirectButton');
+                const originalText = button.textContent;
+                
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    button.textContent = `🔗 Redirigiendo en ${countdown}...`;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        button.textContent = originalText;
+                    }
+                }, 1000);
+            }
+        }, 2000);
+    </script>
+</body>
+</html> 
