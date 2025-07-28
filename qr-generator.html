@@ -1694,12 +1694,7 @@
             }, 5000);
         }
 
-        // Generar QR automáticamente cuando se cambian las opciones
-        document.getElementById('qrUrl').addEventListener('input', function() {
-            if (this.value.trim()) {
-                setTimeout(generateQR, 500);
-            }
-        });
+
 
         // Funcionalidad avanzada de colores
         function initializeColorPickers() {
@@ -1778,102 +1773,130 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM cargado, inicializando event listeners...');
             
-            // Inicializar color pickers
-            initializeColorPickers();
-            
-            // Event listeners para tamaño y corrección de errores
-            const qrSizeElement = document.getElementById('qrSize');
-            const errorCorrectionElement = document.getElementById('errorCorrection');
-            
-            if (qrSizeElement) {
-                qrSizeElement.addEventListener('change', function() {
-                    console.log('Tamaño cambiado a:', this.value);
-                    generateQR();
-                });
-            } else {
-                console.error('Elemento qrSize no encontrado');
-            }
-            
-            if (errorCorrectionElement) {
-                errorCorrectionElement.addEventListener('change', function() {
-                    console.log('Corrección de errores cambiada a:', this.value);
-                    generateQR();
-                });
-            } else {
-                console.error('Elemento errorCorrection no encontrado');
-            }
-            
-                    // Generar QR inicial para mostrar colores
-        setTimeout(() => {
-            console.log('Generando QR inicial para mostrar colores...');
-            
-            // Test directo de colores
-            console.log('=== TEST DIRECTO DE COLORES ===');
-            const testContainer = document.getElementById('qrContainer');
-            testContainer.innerHTML = '';
-            
-            // Crear un contenedor separado para el test
-            const testDiv = document.createElement('div');
-            testDiv.style.border = '2px solid red';
-            testDiv.style.padding = '10px';
-            testDiv.style.margin = '10px';
-            testDiv.innerHTML = '<h4>TEST COLORES - QR ROJO Y VERDE</h4>';
-            testContainer.appendChild(testDiv);
-            
-            const testCanvas = document.createElement('canvas');
-            testCanvas.width = 200;
-            testCanvas.height = 200;
-            testCanvas.style.border = '1px solid blue';
-            testDiv.appendChild(testCanvas);
-            
-            const testOptions = {
-                width: 200,
-                height: 200,
-                colorDark: '#FF0000', // Rojo
-                colorLight: '#00FF00', // Verde
-                correctLevel: 1
-            };
-            
-            console.log('Test Options:', testOptions);
-            
-                                QRCode.toCanvas(testCanvas, 'https://test.com', testOptions, function(error, generatedCanvas) {
-                        if (error) {
-                            console.error('Error en test directo:', error);
-                            return;
+            // Cargar la librería QRCode primero, luego inicializar todo
+            loadQRCodeLibrary().then(() => {
+                console.log('Librería QRCode cargada, inicializando aplicación...');
+                
+                // Inicializar color pickers
+                initializeColorPickers();
+                
+                // Event listeners para URL y nombre
+                const qrUrlElement = document.getElementById('qrUrl');
+                const qrNameElement = document.getElementById('qrTitle');
+                
+                if (qrUrlElement) {
+                    qrUrlElement.addEventListener('input', function() {
+                        if (this.value.trim()) {
+                            setTimeout(generateQR, 500);
                         }
-                        console.log('Test directo exitoso con colores:', testOptions);
-                        console.log('Canvas generado:', generatedCanvas);
-                        console.log('Canvas width:', generatedCanvas.width);
-                        console.log('Canvas height:', generatedCanvas.height);
-                        
-                        // Aplicar colores personalizados al canvas del test
-                        colorizeQRCanvas(generatedCanvas, testOptions.colorDark, testOptions.colorLight);
-                        
-                        // Verificar si el canvas tiene contenido
-                        const ctx = generatedCanvas.getContext('2d');
-                        const imageData = ctx.getImageData(0, 0, generatedCanvas.width, generatedCanvas.height);
-                        console.log('ImageData length:', imageData.data.length);
-                        
-                        // Verificar algunos píxeles para ver si tienen color
-                        let redPixels = 0;
-                        let greenPixels = 0;
-                        for (let i = 0; i < imageData.data.length; i += 4) {
-                            if (imageData.data[i] > 200 && imageData.data[i+1] < 50 && imageData.data[i+2] < 50) {
-                                redPixels++;
-                            }
-                            if (imageData.data[i] < 50 && imageData.data[i+1] > 200 && imageData.data[i+2] < 50) {
-                                greenPixels++;
-                            }
-                        }
-                        console.log('Píxeles rojos encontrados:', redPixels);
-                        console.log('Píxeles verdes encontrados:', greenPixels);
-                        
-                        testDiv.appendChild(generatedCanvas);
                     });
-            
-            // También generar el QR normal
-            generateQR();
-        }, 1000);
+                } else {
+                    console.error('Elemento qrUrl no encontrado');
+                }
+                
+                if (qrNameElement) {
+                    qrNameElement.addEventListener('input', function() {
+                        generateQR();
+                    });
+                } else {
+                    console.error('Elemento qrTitle no encontrado');
+                }
+                
+                // Event listeners para tamaño y corrección de errores
+                const qrSizeElement = document.getElementById('qrSize');
+                const errorCorrectionElement = document.getElementById('errorCorrection');
+                
+                if (qrSizeElement) {
+                    qrSizeElement.addEventListener('change', function() {
+                        console.log('Tamaño cambiado a:', this.value);
+                        generateQR();
+                    });
+                } else {
+                    console.error('Elemento qrSize no encontrado');
+                }
+                
+                if (errorCorrectionElement) {
+                    errorCorrectionElement.addEventListener('change', function() {
+                        console.log('Corrección de errores cambiada a:', this.value);
+                        generateQR();
+                    });
+                } else {
+                    console.error('Elemento errorCorrection no encontrado');
+                }
+                
+                // Generar QR inicial para mostrar colores
+                console.log('Generando QR inicial para mostrar colores...');
+                
+                // Test directo de colores
+                console.log('=== TEST DIRECTO DE COLORES ===');
+                const testContainer = document.getElementById('qrContainer');
+                testContainer.innerHTML = '';
+                
+                // Crear un contenedor separado para el test
+                const testDiv = document.createElement('div');
+                testDiv.style.border = '2px solid red';
+                testDiv.style.padding = '10px';
+                testDiv.style.margin = '10px';
+                testDiv.innerHTML = '<h4>TEST COLORES - QR ROJO Y VERDE</h4>';
+                testContainer.appendChild(testDiv);
+                
+                const testCanvas = document.createElement('canvas');
+                testCanvas.width = 200;
+                testCanvas.height = 200;
+                testCanvas.style.border = '1px solid blue';
+                testDiv.appendChild(testCanvas);
+                
+                const testOptions = {
+                    width: 200,
+                    height: 200,
+                    colorDark: '#FF0000', // Rojo
+                    colorLight: '#00FF00', // Verde
+                    correctLevel: 1
+                };
+                
+                console.log('Test Options:', testOptions);
+                
+                QRCode.toCanvas(testCanvas, 'https://test.com', testOptions, function(error, generatedCanvas) {
+                    if (error) {
+                        console.error('Error en test directo:', error);
+                        return;
+                    }
+                    console.log('Test directo exitoso con colores:', testOptions);
+                    console.log('Canvas generado:', generatedCanvas);
+                    console.log('Canvas width:', generatedCanvas.width);
+                    console.log('Canvas height:', generatedCanvas.height);
+                    
+                    // Aplicar colores personalizados al canvas del test
+                    colorizeQRCanvas(generatedCanvas, testOptions.colorDark, testOptions.colorLight);
+                    
+                    // Verificar si el canvas tiene contenido
+                    const ctx = generatedCanvas.getContext('2d');
+                    const imageData = ctx.getImageData(0, 0, generatedCanvas.width, generatedCanvas.height);
+                    console.log('ImageData length:', imageData.data.length);
+                    
+                    // Verificar algunos píxeles para ver si tienen color
+                    let redPixels = 0;
+                    let greenPixels = 0;
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        if (imageData.data[i] > 200 && imageData.data[i+1] < 50 && imageData.data[i+2] < 50) {
+                            redPixels++;
+                        }
+                        if (imageData.data[i] < 50 && imageData.data[i+1] > 200 && imageData.data[i+2] < 50) {
+                            greenPixels++;
+                        }
+                    }
+                    console.log('Píxeles rojos encontrados:', redPixels);
+                    console.log('Píxeles verdes encontrados:', greenPixels);
+                    
+                    testDiv.appendChild(generatedCanvas);
+                });
+                
+                // También generar el QR normal
+                generateQR();
+                
+            }).catch(error => {
+                console.error('Error al cargar la librería QRCode:', error);
+            });
         });
 
         // Cerrar modal al hacer clic fuera
