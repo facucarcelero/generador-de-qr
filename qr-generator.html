@@ -2115,7 +2115,7 @@
                             const originalHeight = canvas.height;
                             
                             if (quietZoneSize <= 0) {
-                                // Si no hay espacio, el QR debe llenar completamente el canvas
+                                // Si no hay espacio, el QR debe llenar completamente el canvas sin fondo
                                 // Obtener los datos de imagen actuales
                                 const imageData = ctx.getImageData(0, 0, originalWidth, originalHeight);
                                 const data = imageData.data;
@@ -2140,20 +2140,16 @@
                                 const qrWidth = maxX - minX + 1;
                                 const qrHeight = maxY - minY + 1;
                                 
-                                // Crear un nuevo canvas con el QR expandido para llenar todo el espacio
+                                // Crear un nuevo canvas del mismo tamaño
                                 const newCanvas = document.createElement('canvas');
                                 newCanvas.width = originalWidth;
                                 newCanvas.height = originalHeight;
                                 const newCtx = newCanvas.getContext('2d');
                                 
-                                // Obtener el color de fondo (primer píxel)
-                                const bgColor = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+                                // Limpiar el canvas completamente (sin fondo)
+                                newCtx.clearRect(0, 0, originalWidth, originalHeight);
                                 
-                                // Llenar todo el canvas con el color de fondo
-                                newCtx.fillStyle = bgColor;
-                                newCtx.fillRect(0, 0, originalWidth, originalHeight);
-                                
-                                // Calcular el factor de escala para expandir el QR
+                                // Calcular el factor de escala para que el QR llene todo el canvas
                                 const scaleX = originalWidth / qrWidth;
                                 const scaleY = originalHeight / qrHeight;
                                 const scale = Math.min(scaleX, scaleY);
@@ -2183,7 +2179,7 @@
                                 ctx.clearRect(0, 0, originalWidth, originalHeight);
                                 ctx.drawImage(newCanvas, 0, 0);
                                 
-                                console.log('QR expandido para llenar todo el canvas sin espacio');
+                                console.log('QR expandido para llenar todo el canvas sin fondo');
                                 return;
                             }
                             
