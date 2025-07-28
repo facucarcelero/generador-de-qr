@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V9 - BOTÓN GUARDAR CAMBIOS FIXED</title>
+    <title>Generador QR Los Nogales - V10 - EVENT LISTENERS FIXED</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1795,34 +1795,185 @@
             return true;
         }
 
-                    // Inicializar cuando la página esté lista
-            document.addEventListener('DOMContentLoaded', function() {
-                // Mostrar indicador de carga
-                showLibraryLoading();
-                
-                // Cargar la biblioteca QRCode
-                loadQRCodeLibrary()
-                    .then(() => {
-                        console.log('QRCode library loaded successfully');
-                        hideLibraryLoading();
-                        
-                        // Inicializar la aplicación
-                        if (initializeApp()) {
-                            // Cargar QRs guardados al iniciar
-                            loadSavedQRs();
-                            
-                            // Probar la generación de QR después de un breve delay
-                            setTimeout(() => {
-                                testQRGeneration();
-                            }, 500);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Failed to load QRCode library:', error);
-                        hideLibraryLoading();
-                        showLibraryError();
-                    });
-            });
+        // Inicializar cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, inicializando aplicación completa...');
+            
+            // Mostrar indicador de carga
+            showLibraryLoading();
+            
+            // Cargar la biblioteca QRCode
+            loadQRCodeLibrary()
+                .then(() => {
+                    console.log('QRCode library loaded successfully');
+                    hideLibraryLoading();
+                    
+                    // Inicializar color pickers
+                    initializeColorPickers();
+                    
+                    // Inicializar controles de quiet zone
+                    initializeQuietZoneControls();
+                    
+                    // Event listeners para URL y nombre
+                    const qrUrlElement = document.getElementById('qrUrl');
+                    const qrNameElement = document.getElementById('qrTitle');
+                    
+                    if (qrUrlElement) {
+                        qrUrlElement.addEventListener('input', function() {
+                            // Solo actualizar la URL en los datos, no regenerar QR
+                            if (currentQRData) {
+                                currentQRData.url = this.value.trim();
+                                showQRInfo();
+                                // Mostrar botón de guardar cambios
+                                showPendingChanges();
+                            }
+                        });
+                    } else {
+                        console.error('Elemento qrUrl no encontrado');
+                    }
+                    
+                    if (qrNameElement) {
+                        qrNameElement.addEventListener('input', function() {
+                            // Solo actualizar el nombre, no regenerar QR
+                            if (currentQRData) {
+                                currentQRData.title = this.value.trim() || 'QR sin título';
+                                showQRInfo();
+                                // Mostrar botón de guardar cambios
+                                showPendingChanges();
+                            }
+                        });
+                    } else {
+                        console.error('Elemento qrTitle no encontrado');
+                    }
+                    
+                    // Event listeners para tamaño y corrección de errores
+                    const qrSizeElement = document.getElementById('qrSize');
+                    const errorCorrectionElement = document.getElementById('errorCorrection');
+                    
+                    if (qrSizeElement) {
+                        qrSizeElement.addEventListener('change', function() {
+                            console.log('Tamaño cambiado a:', this.value);
+                            // Actualizar tamaño del QR existente en lugar de regenerar
+                            if (currentQRData && currentQRData.qrText) {
+                                updateQRSize();
+                            }
+                        });
+                    } else {
+                        console.error('Elemento qrSize no encontrado');
+                    }
+                    
+                    if (errorCorrectionElement) {
+                        errorCorrectionElement.addEventListener('change', function() {
+                            console.log('Corrección de errores cambiada a:', this.value);
+                            // Solo actualizar el valor, no regenerar QR
+                            if (currentQRData) {
+                                currentQRData.errorCorrection = this.value;
+                                // Mostrar botón de guardar cambios
+                                showPendingChanges();
+                            }
+                        });
+                    } else {
+                        console.error('Elemento errorCorrection no encontrado');
+                    }
+                    
+                    // Cargar QRs guardados al iniciar
+                    loadSavedQRs();
+                    
+                    // Probar la generación de QR después de un breve delay
+                    setTimeout(() => {
+                        testQRGeneration();
+                    }, 500);
+                    
+                    // Agregar event listeners para mejoras de UX
+                    window.addEventListener('scroll', handleScroll);
+                    document.addEventListener('click', handleClickOutside);
+                    document.addEventListener('keydown', handleKeyDown);
+                    
+                    // Agregar soporte táctil
+                    addTouchSupport();
+                    
+                    // Optimizar para móviles
+                    optimizeForMobile();
+                    
+                                         // Cerrar menú móvil al cambiar orientación
+                     window.addEventListener('orientationchange', function() {
+                         setTimeout(() => {
+                             const mobileMenu = document.getElementById('mobileMenu');
+                             if (mobileMenu.classList.contains('active')) {
+                                 toggleMobileMenu();
+                             }
+                         }, 100);
+                     });
+                     
+                     // Cerrar modal al hacer clic fuera
+                     document.getElementById('modal').addEventListener('click', function(e) {
+                         if (e.target === this) {
+                             closeModal();
+                         }
+                     });
+                     
+                     // Registrar Service Worker para PWA
+                     if ('serviceWorker' in navigator) {
+                         window.addEventListener('load', function() {
+                             navigator.serviceWorker.register('/sw.js')
+                                 .then(function(registration) {
+                                     console.log('Service Worker registrado exitosamente:', registration.scope);
+                                 })
+                                 .catch(function(error) {
+                                     console.log('Error al registrar Service Worker:', error);
+                                 });
+                         });
+                     }
+                     
+                     // Mostrar banner de instalación PWA
+                     let deferredPrompt;
+                     window.addEventListener('beforeinstallprompt', (e) => {
+                         e.preventDefault();
+                         deferredPrompt = e;
+                         
+                         // Mostrar botón de instalación si no está ya instalado
+                         const installButton = document.createElement('button');
+                         installButton.textContent = '📱 Instalar App';
+                         installButton.className = 'install-pwa-btn';
+                         installButton.style.cssText = `
+                             position: fixed;
+                             top: 20px;
+                             right: 20px;
+                             background: #10b981;
+                             color: white;
+                             border: none;
+                             padding: 10px 20px;
+                             border-radius: 25px;
+                             font-size: 14px;
+                             font-weight: 600;
+                             cursor: pointer;
+                             z-index: 1000;
+                             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                             transition: all 0.3s ease;
+                         `;
+                         
+                         installButton.addEventListener('click', async () => {
+                             if (deferredPrompt) {
+                                 deferredPrompt.prompt();
+                                 const { outcome } = await deferredPrompt.userChoice;
+                                 if (outcome === 'accepted') {
+                                     console.log('Usuario aceptó instalar la app');
+                                 }
+                                 deferredPrompt = null;
+                                 installButton.remove();
+                             }
+                         });
+                         
+                         document.body.appendChild(installButton);
+                     });
+                     
+                 })
+                 .catch(error => {
+                     console.error('Failed to load QRCode library:', error);
+                     hideLibraryLoading();
+                     showLibraryError();
+                 });
+         });
 
         // Función para probar la generación de QR
         function testQRGeneration() {
@@ -2637,222 +2788,9 @@
             }
         }
 
-        // Inicializar todos los event listeners cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado, inicializando event listeners...');
-            
-            // Cargar la librería QRCode primero, luego inicializar todo
-            loadQRCodeLibrary().then(() => {
-                console.log('Librería QRCode cargada, inicializando aplicación...');
-                
-                // Inicializar color pickers
-                initializeColorPickers();
-                
-                // Inicializar controles de quiet zone
-                initializeQuietZoneControls();
-                
-                // Event listeners para URL y nombre
-                const qrUrlElement = document.getElementById('qrUrl');
-                const qrNameElement = document.getElementById('qrTitle');
-                
-                if (qrUrlElement) {
-                    qrUrlElement.addEventListener('input', function() {
-                        // Solo actualizar la URL en los datos, no regenerar QR
-                        if (currentQRData) {
-                            currentQRData.url = this.value.trim();
-                            showQRInfo();
-                            // Mostrar botón de guardar cambios
-                            showPendingChanges();
-                        }
-                    });
-                } else {
-                    console.error('Elemento qrUrl no encontrado');
-                }
-                
-                if (qrNameElement) {
-                    qrNameElement.addEventListener('input', function() {
-                        // Solo actualizar el nombre, no regenerar QR
-                        if (currentQRData) {
-                            currentQRData.title = this.value.trim() || 'QR sin título';
-                            showQRInfo();
-                            // Mostrar botón de guardar cambios
-                            showPendingChanges();
-                        }
-                    });
-                } else {
-                    console.error('Elemento qrTitle no encontrado');
-                }
-                
-                // Event listeners para tamaño y corrección de errores
-                const qrSizeElement = document.getElementById('qrSize');
-                const errorCorrectionElement = document.getElementById('errorCorrection');
-                
-                if (qrSizeElement) {
-                    qrSizeElement.addEventListener('change', function() {
-                        console.log('Tamaño cambiado a:', this.value);
-                        // Actualizar tamaño del QR existente en lugar de regenerar
-                        if (currentQRData && currentQRData.qrText) {
-                            updateQRSize();
-                        }
-                    });
-                } else {
-                    console.error('Elemento qrSize no encontrado');
-                }
-                
-                if (errorCorrectionElement) {
-                    errorCorrectionElement.addEventListener('change', function() {
-                        console.log('Corrección de errores cambiada a:', this.value);
-                        // Solo actualizar el valor, no regenerar QR
-                        if (currentQRData) {
-                            currentQRData.errorCorrection = this.value;
-                            // Mostrar botón de guardar cambios
-                            showPendingChanges();
-                        }
-                    });
-                } else {
-                    console.error('Elemento errorCorrection no encontrado');
-                }
-                
-                // Generar QR inicial para mostrar colores
-                console.log('Generando QR inicial para mostrar colores...');
-                
-                // Test directo de colores
-                console.log('=== TEST DIRECTO DE COLORES ===');
-                const testContainer = document.getElementById('qrContainer');
-                testContainer.innerHTML = '';
-                
-                // Crear un contenedor separado para el test
-                const testDiv = document.createElement('div');
-                testDiv.style.border = '2px solid red';
-                testDiv.style.padding = '10px';
-                testDiv.style.margin = '10px';
-                testDiv.innerHTML = '<h4>TEST COLORES - QR ROJO Y VERDE</h4>';
-                testContainer.appendChild(testDiv);
-                
-                const testCanvas = document.createElement('canvas');
-                testCanvas.width = 200;
-                testCanvas.height = 200;
-                testCanvas.style.border = '1px solid blue';
-                testDiv.appendChild(testCanvas);
-                
-                const testOptions = {
-                    width: 200,
-                    height: 200,
-                    colorDark: '#FF0000', // Rojo
-                    colorLight: '#00FF00', // Verde
-                    correctLevel: 1
-                };
-                
-                console.log('Test Options:', testOptions);
-                
-                QRCode.toCanvas(testCanvas, 'https://test.com', testOptions, function(error, generatedCanvas) {
-                    if (error) {
-                        console.error('Error en test directo:', error);
-                        return;
-                    }
-                    console.log('Test directo exitoso con colores:', testOptions);
-                    console.log('Canvas generado:', generatedCanvas);
-                    console.log('Canvas width:', generatedCanvas.width);
-                    console.log('Canvas height:', generatedCanvas.height);
-                    
-                    // Aplicar colores personalizados al canvas del test
-                    colorizeQRCanvas(generatedCanvas, testOptions.colorDark, testOptions.colorLight);
-                    
-                    // Verificar si el canvas tiene contenido
-                    const ctx = generatedCanvas.getContext('2d');
-                    const imageData = ctx.getImageData(0, 0, generatedCanvas.width, generatedCanvas.height);
-                    console.log('ImageData length:', imageData.data.length);
-                    
-                    // Verificar algunos píxeles para ver si tienen color
-                    let redPixels = 0;
-                    let greenPixels = 0;
-                    for (let i = 0; i < imageData.data.length; i += 4) {
-                        if (imageData.data[i] > 200 && imageData.data[i+1] < 50 && imageData.data[i+2] < 50) {
-                            redPixels++;
-                        }
-                        if (imageData.data[i] < 50 && imageData.data[i+1] > 200 && imageData.data[i+2] < 50) {
-                            greenPixels++;
-                        }
-                    }
-                    console.log('Píxeles rojos encontrados:', redPixels);
-                    console.log('Píxeles verdes encontrados:', greenPixels);
-                    
-                    testDiv.appendChild(generatedCanvas);
-                });
-                
-                // Comentado: No generar QR automáticamente al cargar la página
-                // generateQR();
-                
-            }).catch(error => {
-                console.error('Error al cargar la librería QRCode:', error);
-            });
-        });
-
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Registrar Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('Service Worker registrado exitosamente:', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.log('Error al registrar Service Worker:', error);
-                    });
-            });
-        }
-
-        // Mostrar banner de instalación PWA
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Mostrar botón de instalación si no está ya instalado
-            const installButton = document.createElement('button');
-            installButton.textContent = '📱 Instalar App';
-            installButton.className = 'install-pwa-btn';
-            installButton.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #10b981;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 25px;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-                transition: all 0.3s ease;
-            `;
-            
-            installButton.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        console.log('Usuario aceptó instalar la app');
-                    }
-                    deferredPrompt = null;
-                    installButton.remove();
-                }
-            });
-            
-            document.body.appendChild(installButton);
-        });
-
         // Función para colorear el canvas del QR
         function colorizeQRCanvas(canvas, foregroundColor, backgroundColor) {
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             
@@ -3174,30 +3112,6 @@
                 document.head.appendChild(style);
             }
         }
-
-        // Inicializar mejoras de UX cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            // Agregar event listeners para mejoras de UX
-            window.addEventListener('scroll', handleScroll);
-            document.addEventListener('click', handleClickOutside);
-            document.addEventListener('keydown', handleKeyDown);
-            
-            // Agregar soporte táctil
-            addTouchSupport();
-            
-            // Optimizar para móviles
-            optimizeForMobile();
-            
-            // Cerrar menú móvil al cambiar orientación
-            window.addEventListener('orientationchange', function() {
-                setTimeout(() => {
-                    const mobileMenu = document.getElementById('mobileMenu');
-                    if (mobileMenu.classList.contains('active')) {
-                        toggleMobileMenu();
-                    }
-                }, 100);
-            });
-        });
     </script>
 </body>
 </html> 

@@ -1,7 +1,7 @@
-const CACHE_NAME = 'qr-generator-v1.0.0';
+const CACHE_NAME = 'qr-generator-v2.0.0';
 const urlsToCache = [
   '/',
-  '/qr-generator.html',
+  '/index.html',
   '/qr-redirect.html',
   '/qrcode.min.js',
   '/Logo/android-chrome-192x192.png',
@@ -14,7 +14,15 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Cache abierto');
-        return cache.addAll(urlsToCache);
+        // Cachear archivos uno por uno para manejar errores individualmente
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch(error => {
+              console.log(`Error al cachear ${url}:`, error);
+              return null; // Continuar con otros archivos
+            })
+          )
+        );
       })
   );
 });
