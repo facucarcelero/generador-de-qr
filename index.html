@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V22 - FIXED DOM ELEMENTS</title>
+    <title>Generador QR Los Nogales - V23 - FIXED INFINITE LOOP</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1844,8 +1844,15 @@
         });
 
         // Función para inicializar toda la aplicación
-        function initializeApplication() {
-            console.log('Inicializando aplicación...');
+        function initializeApplication(retryCount = 0) {
+            console.log('Inicializando aplicación... (intento ' + (retryCount + 1) + ')');
+            
+            // Límite máximo de reintentos para evitar bucle infinito
+            if (retryCount > 10) {
+                console.error('Demasiados reintentos, inicializando con elementos disponibles');
+                initializeWithAvailableElements();
+                return;
+            }
             
             // Verificar que los elementos principales existan antes de inicializar
             const requiredElements = [
@@ -1857,7 +1864,7 @@
             if (missingElements.length > 0) {
                 console.warn('Elementos faltantes, esperando...', missingElements);
                 // Reintentar después de un delay
-                setTimeout(initializeApplication, 200);
+                setTimeout(() => initializeApplication(retryCount + 1), 200);
                 return;
             }
             
@@ -1965,6 +1972,38 @@
                 
                 document.body.appendChild(installButton);
             });
+        }
+
+        // Función para inicializar con elementos disponibles
+        function initializeWithAvailableElements() {
+            console.log('Inicializando con elementos disponibles...');
+            
+            // Inicializar solo los elementos que existan
+            try {
+                initializeColorPickers();
+            } catch (e) {
+                console.warn('Error inicializando color pickers:', e);
+            }
+            
+            try {
+                initializeQuietZoneControls();
+            } catch (e) {
+                console.warn('Error inicializando controles de quiet zone:', e);
+            }
+            
+            try {
+                initializeEventListeners();
+            } catch (e) {
+                console.warn('Error inicializando event listeners:', e);
+            }
+            
+            try {
+                loadSavedQRs();
+            } catch (e) {
+                console.warn('Error cargando QRs guardados:', e);
+            }
+            
+            console.log('Aplicación inicializada con elementos disponibles');
         }
 
         // Función para inicializar event listeners
