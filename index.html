@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V10 - EVENT LISTENERS FIXED</title>
+    <title>Generador QR Los Nogales - V11 - LOADING FIXED</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -37,66 +37,52 @@
         // V4 - SOLUCIÓN DEFINITIVA: Cargar biblioteca QRCode
         async function loadQRCodeLibrary() {
             return new Promise(async (resolve, reject) => {
-                // Usar SOLO el archivo local para evitar problemas de CORS y CDN
-                const sources = [
-                    'qrcode.min.js' // SOLO biblioteca local
-                ];
+                console.log('🔍 V4 - Intentando cargar biblioteca QRCode desde archivo local...');
                 
-                // Variables simplificadas para solo archivo local
-                
-                async function tryNextSource() {
-                    const currentSource = 'qrcode.min.js';
-                    console.log('🔍 V4 - Intentando cargar biblioteca QRCode desde archivo local...');
-                    
-                    // Verificar si el archivo local está disponible
-                    const isAvailable = await checkLocalFile(currentSource);
-                    if (!isAvailable) {
-                        console.error('❌ Archivo local qrcode.min.js no encontrado');
-                        hideLibraryLoading();
-                        reject(new Error('No se pudo cargar la biblioteca QRCode. El archivo local qrcode.min.js no está disponible.'));
-                        return;
-                    }
-                    
-                    console.log('✅ V4 - Archivo local encontrado, cargando biblioteca...');
-                    
-                    const script = document.createElement('script');
-                    script.src = currentSource;
-                    script.async = true;
-                    
-                    const timeout = setTimeout(() => {
-                        console.error('❌ V4 - Timeout cargando biblioteca local');
-                        script.onerror();
-                    }, 10000); // 10 segundos para archivo local
-                    
-                    script.onload = () => {
-                        clearTimeout(timeout);
-                        // Verificar si QRCode se cargó correctamente
-                        if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
-                            console.log('✅ V4 - QRCode library loaded successfully from local file');
-                            hideLibraryLoading();
-                            resolve();
-                        } else {
-                            console.error('❌ V4 - QRCode loaded but toCanvas method not available');
-                            hideLibraryLoading();
-                            reject(new Error('La biblioteca QRCode se cargó pero no tiene el método toCanvas necesario.'));
-                        }
-                    };
-                    
-                    script.onerror = () => {
-                        clearTimeout(timeout);
-                        console.error('❌ V4 - Failed to load local QRCode library');
-                        hideLibraryLoading();
-                        reject(new Error('No se pudo cargar la biblioteca QRCode desde el archivo local.'));
-                    };
-                    
-                    document.head.appendChild(script);
+                // Verificar si el archivo local está disponible
+                const isAvailable = await checkLocalFile('qrcode.min.js');
+                if (!isAvailable) {
+                    console.error('❌ Archivo local qrcode.min.js no encontrado');
+                    hideLibraryLoading();
+                    reject(new Error('No se pudo cargar la biblioteca QRCode. El archivo local qrcode.min.js no está disponible.'));
+                    return;
                 }
                 
-
+                console.log('✅ V4 - Archivo local encontrado, cargando biblioteca...');
+                
+                const script = document.createElement('script');
+                script.src = 'qrcode.min.js';
+                script.async = true;
+                
+                const timeout = setTimeout(() => {
+                    console.error('❌ V4 - Timeout cargando biblioteca local');
+                    script.onerror();
+                }, 10000); // 10 segundos para archivo local
+                
+                script.onload = () => {
+                    clearTimeout(timeout);
+                    // Verificar si QRCode se cargó correctamente
+                    if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
+                        console.log('✅ V4 - QRCode library loaded successfully from local file');
+                        hideLibraryLoading();
+                        resolve();
+                    } else {
+                        console.error('❌ V4 - QRCode loaded but toCanvas method not available');
+                        hideLibraryLoading();
+                        reject(new Error('La biblioteca QRCode se cargó pero no tiene el método toCanvas necesario.'));
+                    }
+                };
+                
+                script.onerror = () => {
+                    clearTimeout(timeout);
+                    console.error('❌ V4 - Failed to load local QRCode library');
+                    hideLibraryLoading();
+                    reject(new Error('No se pudo cargar la biblioteca QRCode desde el archivo local.'));
+                };
                 
                 // Mostrar indicador de carga
                 showLibraryLoading();
-                tryNextSource();
+                document.head.appendChild(script);
             });
         }
 
