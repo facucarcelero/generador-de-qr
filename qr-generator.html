@@ -1264,7 +1264,7 @@
                 const qrNameForDynamic = document.getElementById('qrTitle').value.trim() || 'QR Dinámico';
                 
                 // Agregar parámetros de estadísticas a la URL
-                qrText = this.addStatsParamsToUrl(url, idForDynamicQR, qrNameForDynamic);
+                qrText = addStatsParamsToUrl(url, idForDynamicQR, qrNameForDynamic);
                 
                 // Guardar información para estadísticas (se usará internamente)
                 const encodedUrl = btoa(encodeURIComponent(url));
@@ -1457,8 +1457,10 @@
                 // Codificar la URL en base64 para evitar problemas con caracteres especiales
                 const encodedUrl = btoa(encodeURIComponent(currentQRData.url));
                 const encodedName = btoa(encodeURIComponent(name));
-                                        qrData.redirectUrl = qrData.url; // Usar la URL directa
-                qrData.url = qrData.redirectUrl; // Usar la URL de redirección para el QR
+                qrData.redirectUrl = currentQRData.url; // Usar la URL directa
+                qrData.url = currentQRData.url; // Usar la URL original
+                qrData.encodedUrl = encodedUrl; // Guardar para estadísticas
+                qrData.encodedName = encodedName; // Guardar para estadísticas
             } else {
                 qrData.url = currentQRData.url; // Para QRs estáticos, usar la URL original
             }
