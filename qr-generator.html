@@ -2206,6 +2206,39 @@
                                 return;
                             }
                             
+                            // Para espacios muy pequeños (1-5px), usar un enfoque más sutil
+                            if (quietZoneSize <= 5) {
+                                // En lugar de agregar espacio, reducir ligeramente el QR para crear el efecto de "casi sin fondo"
+                                const reductionFactor = quietZoneSize / 5; // 0.2 para 1px, 0.4 para 2px, etc.
+                                const reduction = Math.floor(originalWidth * reductionFactor * 0.1); // Máximo 10% de reducción
+                                
+                                // Crear un nuevo canvas del mismo tamaño
+                                const newCanvas = document.createElement('canvas');
+                                newCanvas.width = originalWidth;
+                                newCanvas.height = originalHeight;
+                                const newCtx = newCanvas.getContext('2d');
+                                
+                                // Llenar con el color de fondo del QR
+                                newCtx.fillStyle = qrLightColor;
+                                newCtx.fillRect(0, 0, originalWidth, originalHeight);
+                                
+                                // Dibujar el QR ligeramente más pequeño y centrado
+                                const newWidth = originalWidth - (reduction * 2);
+                                const newHeight = originalHeight - (reduction * 2);
+                                const offsetX = reduction;
+                                const offsetY = reduction;
+                                
+                                newCtx.drawImage(canvas, offsetX, offsetY, newWidth, newHeight);
+                                
+                                // Reemplazar el canvas original
+                                ctx.clearRect(0, 0, originalWidth, originalHeight);
+                                ctx.drawImage(newCanvas, 0, 0);
+                                
+                                console.log('Quiet zone sutil aplicado al QR:', { size: quietZoneSize, reduction });
+                                return;
+                            }
+                            
+                            // Para espacios más grandes, usar el método tradicional
                             // Crear un nuevo canvas con espacio para el quiet zone
                             const newCanvas = document.createElement('canvas');
                             newCanvas.width = originalWidth + (quietZoneSize * 2);
