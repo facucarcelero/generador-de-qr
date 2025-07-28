@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V23 - FIXED INFINITE LOOP</title>
+    <title>Generador QR Los Nogales - V24 - FIXED WINDOW.LOAD</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1813,9 +1813,9 @@
             return true;
         }
 
-        // Inicializar cuando la página esté lista
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado, inicializando aplicación completa...');
+        // Inicializar cuando la página esté completamente cargada
+        window.addEventListener('load', function() {
+            console.log('Página completamente cargada, inicializando aplicación...');
             
             // Timeout de seguridad para ocultar indicador de carga
             setTimeout(() => {
@@ -1827,11 +1827,8 @@
                 .then(() => {
                     console.log('QRCode library loaded successfully');
                     
-                    // Esperar un poco más para asegurar que todos los elementos estén disponibles
-                    setTimeout(() => {
-                        // Inicializar la aplicación después de cargar la biblioteca
-                        initializeApplication();
-                    }, 100);
+                    // Inicializar la aplicación después de cargar la biblioteca
+                    initializeApplication();
                 })
                 .catch((error) => {
                     console.error('Error cargando biblioteca QRCode:', error);
@@ -1844,29 +1841,8 @@
         });
 
         // Función para inicializar toda la aplicación
-        function initializeApplication(retryCount = 0) {
-            console.log('Inicializando aplicación... (intento ' + (retryCount + 1) + ')');
-            
-            // Límite máximo de reintentos para evitar bucle infinito
-            if (retryCount > 10) {
-                console.error('Demasiados reintentos, inicializando con elementos disponibles');
-                initializeWithAvailableElements();
-                return;
-            }
-            
-            // Verificar que los elementos principales existan antes de inicializar
-            const requiredElements = [
-                'foregroundColor', 'backgroundColor', 'foregroundHex', 'backgroundColorHex',
-                'quietZoneSize', 'qrUrl', 'qrTitle', 'qrSize', 'errorCorrection'
-            ];
-            
-            const missingElements = requiredElements.filter(id => !document.getElementById(id));
-            if (missingElements.length > 0) {
-                console.warn('Elementos faltantes, esperando...', missingElements);
-                // Reintentar después de un delay
-                setTimeout(() => initializeApplication(retryCount + 1), 200);
-                return;
-            }
+        function initializeApplication() {
+            console.log('Inicializando aplicación...');
             
             // Inicializar color pickers
             initializeColorPickers();
