@@ -1396,11 +1396,11 @@
                     // Aplicar colores personalizados al canvas
                     colorizeQRCanvas(generatedCanvas, options.colorDark, options.colorLight);
 
-                                                        // Aplicar quiet zone personalizado
-                                    const quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
-                                    if (quietZoneSize > 0) {
-                                        applyQuietZoneToQR(generatedCanvas, quietZoneSize);
-                                    }
+                    // Aplicar quiet zone personalizado
+                    const quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
+                    if (quietZoneSize >= 0) {
+                        applyQuietZoneToQR(generatedCanvas, quietZoneSize);
+                    }
 
                     // Agregar logo si existe
                     const logoFile = document.getElementById('logoFile').files[0];
@@ -2115,25 +2115,72 @@
                             const originalHeight = canvas.height;
                             
                             if (quietZoneSize <= 0) {
-                                // Si no hay espacio, expandir el QR para llenar todo el canvas
-                                // Obtener el color de fondo actual del QR
-                                const imageData = ctx.getImageData(0, 0, 1, 1);
-                                const backgroundColor = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
+                                // Si no hay espacio, el QR debe llenar completamente el canvas
+                                // Obtener los datos de imagen actuales
+                                const imageData = ctx.getImageData(0, 0, originalWidth, originalHeight);
+                                const data = imageData.data;
                                 
-                                // Crear un nuevo canvas del mismo tamaño pero con el QR expandido
+                                // Encontrar los límites del QR (dónde empieza y termina el patrón)
+                                let minX = originalWidth, minY = originalHeight, maxX = 0, maxY = 0;
+                                
+                                for (let y = 0; y < originalHeight; y++) {
+                                    for (let x = 0; x < originalWidth; x++) {
+                                        const index = (y * originalWidth + x) * 4;
+                                        // Si el píxel no es completamente blanco (es parte del QR)
+                                        if (data[index] < 255 || data[index + 1] < 255 || data[index + 2] < 255) {
+                                            minX = Math.min(minX, x);
+                                            minY = Math.min(minY, y);
+                                            maxX = Math.max(maxX, x);
+                                            maxY = Math.max(maxY, y);
+                                        }
+                                    }
+                                }
+                                
+                                // Calcular las dimensiones del QR real
+                                const qrWidth = maxX - minX + 1;
+                                const qrHeight = maxY - minY + 1;
+                                
+                                // Crear un nuevo canvas con el QR expandido para llenar todo el espacio
                                 const newCanvas = document.createElement('canvas');
                                 newCanvas.width = originalWidth;
                                 newCanvas.height = originalHeight;
                                 const newCtx = newCanvas.getContext('2d');
                                 
-                                // Llenar todo el canvas con el color de fondo del QR
-                                newCtx.fillStyle = backgroundColor;
-                                newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+                                // Obtener el color de fondo (primer píxel)
+                                const bgColor = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
                                 
-                                // Dibujar el QR expandido para llenar todo el canvas
-                                newCtx.drawImage(canvas, 0, 0, newCanvas.width, newCanvas.height);
+                                // Llenar todo el canvas con el color de fondo
+                                newCtx.fillStyle = bgColor;
+                                newCtx.fillRect(0, 0, originalWidth, originalHeight);
+                                
+                                // Calcular el factor de escala para expandir el QR
+                                const scaleX = originalWidth / qrWidth;
+                                const scaleY = originalHeight / qrHeight;
+                                const scale = Math.min(scaleX, scaleY);
+                                
+                                // Calcular las nuevas dimensiones del QR expandido
+                                const scaledWidth = qrWidth * scale;
+                                const scaledHeight = qrHeight * scale;
+                                
+                                // Calcular la posición centrada
+                                const offsetX = (originalWidth - scaledWidth) / 2;
+                                const offsetY = (originalHeight - scaledHeight) / 2;
+                                
+                                // Crear un canvas temporal con solo el QR
+                                const tempCanvas = document.createElement('canvas');
+                                tempCanvas.width = qrWidth;
+                                tempCanvas.height = qrHeight;
+                                const tempCtx = tempCanvas.getContext('2d');
+                                
+                                // Copiar solo la parte del QR al canvas temporal
+                                const qrImageData = ctx.getImageData(minX, minY, qrWidth, qrHeight);
+                                tempCtx.putImageData(qrImageData, 0, 0);
+                                
+                                // Dibujar el QR expandido en el nuevo canvas
+                                newCtx.drawImage(tempCanvas, offsetX, offsetY, scaledWidth, scaledHeight);
                                 
                                 // Reemplazar el canvas original
+                                ctx.clearRect(0, 0, originalWidth, originalHeight);
                                 ctx.drawImage(newCanvas, 0, 0);
                                 
                                 console.log('QR expandido para llenar todo el canvas sin espacio');
