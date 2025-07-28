@@ -130,6 +130,22 @@
             color: #10b981;
             font-weight: 600;
             margin: 20px 0;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .error {
@@ -197,7 +213,8 @@
         <h1>Redirección QR Dinámica</h1>
         
         <div id="loading" class="loading">
-            <p>Cargando información del código QR...</p>
+            <div class="spinner"></div>
+            <p>Redirigiendo al enlace...</p>
         </div>
 
         <div id="content" style="display: none;">
@@ -255,7 +272,26 @@
         if (!qrId || !encodedUrl || !encodedName) {
             showError('Parámetros de código QR incompletos');
         } else {
-            loadQRData();
+            // Redirección inmediata al enlace final
+            redirectImmediately();
+        }
+
+        function redirectImmediately() {
+            try {
+                // Decodificar la URL original
+                const originalUrl = decodeURIComponent(atob(encodedUrl));
+                
+                // Actualizar estadísticas antes de redirigir
+                updateVisitCount(qrId);
+                
+                // Mostrar pantalla de carga por 500ms y luego redirigir
+                setTimeout(() => {
+                    window.location.href = originalUrl;
+                }, 500);
+            } catch (error) {
+                // Si hay error, mostrar la página de error
+                showError('Error al procesar la redirección');
+            }
         }
 
         function loadQRData() {
