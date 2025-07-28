@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V14 - FORCE DEPLOY</title>
+    <title>Generador QR Los Nogales - V15 - FIXED LAYOUT</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -190,6 +190,9 @@
             if (loadingDiv) {
                 loadingDiv.remove();
             }
+            // También ocultar cualquier overlay de carga que pueda estar causando problemas
+            const overlays = document.querySelectorAll('.loading-overlay, .library-loading');
+            overlays.forEach(overlay => overlay.remove());
         }
 
                         // La biblioteca se cargará cuando el DOM esté listo
@@ -1785,6 +1788,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM cargado, inicializando aplicación completa...');
             
+            // Timeout de seguridad para ocultar indicador de carga
+            setTimeout(() => {
+                hideLibraryLoading();
+            }, 5000);
+            
             // Cargar la biblioteca QRCode primero
             loadQRCodeLibrary()
                 .then(() => {
@@ -1795,6 +1803,7 @@
                 })
                 .catch((error) => {
                     console.error('Error cargando biblioteca QRCode:', error);
+                    hideLibraryLoading(); // Asegurarse de ocultar el indicador de carga
                     showLibraryError(error.message);
                 });
         });
@@ -1802,6 +1811,9 @@
         // Función para inicializar toda la aplicación
         function initializeApplication() {
             console.log('Inicializando aplicación...');
+            
+            // Asegurarse de que el indicador de carga se oculte
+            hideLibraryLoading();
             
             // Inicializar color pickers
             initializeColorPickers();
