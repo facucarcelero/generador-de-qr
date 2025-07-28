@@ -1,0 +1,9 @@
+# Eliminar redirecciones automáticas
+# Asegurar que la raíz sirva index.html directamente
+/ /index.html 200
+
+# Redirigir cualquier intento de acceder a qr-generator.html a la raíz
+/qr-generator.html / 301
+
+# Manejar errores 404
+/* /index.html 404 
