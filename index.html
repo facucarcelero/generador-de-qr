@@ -2552,7 +2552,23 @@
                 type: qrType,
                 originalUrl: currentQRData.url, // Guardar la URL original
                 timestamp: new Date().toISOString(),
-                imageData: getQRImageData(), // Usar función para obtener imagen
+                imageData: (() => {
+                    // Obtener imagen del canvas directamente
+                    const qrContainer = document.getElementById('qrContainer');
+                    const canvas = qrContainer ? qrContainer.querySelector('canvas') : null;
+                    
+                    if (!canvas) {
+                        console.error('No se encontró canvas del QR');
+                        return null;
+                    }
+                    
+                    try {
+                        return canvas.toDataURL('image/png');
+                    } catch (error) {
+                        console.error('Error al obtener imagen del QR:', error);
+                        return null;
+                    }
+                })(),
                 // Guardar configuración para poder editar
                 size: document.getElementById('qrSize').value,
                 colors: {
