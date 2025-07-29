@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V58</title>
+    <title>Generador de QR - Los Nogales - V59</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -2807,11 +2807,25 @@
                     savedQRs[qrIndex].encodedUrl = btoa(encodeURIComponent(newUrl));
                     savedQRs[qrIndex].encodedName = btoa(encodeURIComponent(qrName));
                     
+                    // Guardar inmediatamente los cambios en localStorage
+                    const saveSuccess = safeSetItem('savedQRs', savedQRs);
+                    if (!saveSuccess) {
+                        showMessage('⚠️ Error al guardar los cambios. Verifica el almacenamiento.', 'error');
+                        return;
+                    }
+                    
                     // Regenerar el QR visual con la nueva URL
                     regenerateQRWithNewUrl(redirectUrl, qr, savedQRs, qrIndex);
                 } else {
                     // Para QRs estáticos, solo actualizar la URL
                     savedQRs[qrIndex].url = newUrl;
+                    
+                    // Guardar inmediatamente los cambios en localStorage
+                    const saveSuccess = safeSetItem('savedQRs', savedQRs);
+                    if (!saveSuccess) {
+                        showMessage('⚠️ Error al guardar los cambios. Verifica el almacenamiento.', 'error');
+                        return;
+                    }
                     
                     // Regenerar el QR visual con la nueva URL
                     regenerateQRWithNewUrl(newUrl, qr, savedQRs, qrIndex);
@@ -2857,10 +2871,10 @@
                 // Actualizar la imagen en el QR guardado
                 savedQRs[qrIndex].imageData = newImageData;
                 
-                // Guardar los cambios
+                // Guardar solo la actualización de la imagen
                 const saveSuccess = safeSetItem('savedQRs', savedQRs);
                 if (!saveSuccess) {
-                    showMessage('⚠️ No se pudo guardar la actualización. Verifica el almacenamiento.', 'warning');
+                    showMessage('⚠️ No se pudo guardar la imagen actualizada. Verifica el almacenamiento.', 'warning');
                 } else {
                     showMessage('QR actualizado exitosamente. El código QR ahora redirigirá a la nueva URL.', 'success');
                 }
