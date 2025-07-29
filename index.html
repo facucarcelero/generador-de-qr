@@ -3237,40 +3237,40 @@
                 if (window.innerWidth > 768) {
                     console.log('🖥️ Corrigiendo fondo en desktop...');
                     
-                    // Corregir fondo azul en desktop
+                    // Corregir fondo azul en desktop de manera suave
                     if (document.body) {
-                        document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
-                        document.body.style.backgroundColor = 'transparent';
-                    }
-                    if (document.documentElement) {
-                        document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
-                        document.documentElement.style.backgroundColor = 'transparent';
+                        const currentBg = window.getComputedStyle(document.body).background;
+                        if (currentBg.includes('blue') || currentBg.includes('rgb(0, 0, 255)')) {
+                            document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                            console.log('✅ Fondo azul corregido en body');
+                        }
                     }
                     
-                    // Buscar y corregir elementos con fondo azul
-                    const allElements = document.querySelectorAll('*');
-                    allElements.forEach(el => {
+                    // Solo corregir elementos específicos con fondo azul
+                    const elementsWithBlue = document.querySelectorAll('*');
+                    let correctedCount = 0;
+                    elementsWithBlue.forEach(el => {
                         const style = window.getComputedStyle(el);
                         if (style.background === 'blue' || style.backgroundColor === 'blue') {
                             el.style.background = 'transparent';
                             el.style.backgroundColor = 'transparent';
+                            correctedCount++;
                         }
                     });
                     
-                    console.log('✅ Fondo corregido en desktop');
+                    if (correctedCount > 0) {
+                        console.log(`✅ ${correctedCount} elementos azules corregidos`);
+                    }
                 }
             }
             
-            // Ejecutar cuando el DOM esté listo
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', fixDesktopBackground);
-            } else {
-                fixDesktopBackground();
-            }
+            // Ejecutar después de que la página esté completamente cargada
+            window.addEventListener('load', function() {
+                setTimeout(fixDesktopBackground, 100);
+            });
             
-            // También ejecutar después de un tiempo
-            setTimeout(fixDesktopBackground, 100);
-            setTimeout(fixDesktopBackground, 500);
+            // También ejecutar después de un tiempo adicional
+            setTimeout(fixDesktopBackground, 1000);
         })();
     </script>
 </body>
