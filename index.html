@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V59</title>
+    <title>Generador de QR - Los Nogales - V60</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -2573,10 +2573,47 @@
                 return;
             }
 
-            const link = document.createElement('a');
-            link.download = `qr-${currentQRData.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
+            try {
+                // Método compatible con móviles
+                if (navigator.share && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    // Para dispositivos móviles, usar Web Share API
+                    canvas.toBlob(function(blob) {
+                        const file = new File([blob], `qr-${currentQRData.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`, { type: 'image/png' });
+                        navigator.share({
+                            title: 'Mi Código QR',
+                            text: 'Código QR generado',
+                            files: [file]
+                        }).catch(error => {
+                            console.log('Error al compartir:', error);
+                            // Fallback al método tradicional
+                            downloadWithLink();
+                        });
+                    }, 'image/png');
+                } else {
+                    // Para desktop, usar método tradicional
+                    downloadWithLink();
+                }
+            } catch (error) {
+                console.error('Error en descarga:', error);
+                // Fallback al método tradicional
+                downloadWithLink();
+            }
+
+            function downloadWithLink() {
+                const link = document.createElement('a');
+                link.download = `qr-${currentQRData.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
+                link.href = canvas.toDataURL();
+                
+                // Para móviles, abrir en nueva pestaña
+                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                }
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
 
         function generateId() {
@@ -2980,15 +3017,55 @@
         function downloadSavedQR(qrId) {
             const savedQRs = safeGetItem('savedQRs', []);
             const qr = savedQRs.find(q => q.id === qrId);
-            if (!qr) return;
+            if (!qr || !qr.imageData) {
+                showMessage('No se encontró la imagen del QR', 'error');
+                return;
+            }
 
-            // Crear un enlace temporal para descargar
-            const link = document.createElement('a');
-            link.href = qr.dataUrl;
-            link.download = `qr-${qr.name || 'codigo'}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            try {
+                // Método compatible con móviles
+                if (navigator.share && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    // Para dispositivos móviles, usar Web Share API
+                    fetch(qr.imageData)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], `qr-${qr.name || 'codigo'}.png`, { type: 'image/png' });
+                            return navigator.share({
+                                title: 'Mi Código QR',
+                                text: `QR: ${qr.name}`,
+                                files: [file]
+                            });
+                        })
+                        .catch(error => {
+                            console.log('Error al compartir:', error);
+                            // Fallback al método tradicional
+                            downloadWithLink();
+                        });
+                } else {
+                    // Para desktop, usar método tradicional
+                    downloadWithLink();
+                }
+            } catch (error) {
+                console.error('Error en descarga:', error);
+                // Fallback al método tradicional
+                downloadWithLink();
+            }
+
+            function downloadWithLink() {
+                const link = document.createElement('a');
+                link.href = qr.imageData;
+                link.download = `qr-${qr.name || 'codigo'}.png`;
+                
+                // Para móviles, abrir en nueva pestaña
+                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                }
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
             
             showMessage('QR descargado exitosamente', 'success');
         }
