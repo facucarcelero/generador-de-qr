@@ -1417,65 +1417,32 @@
         // Forzar eliminación inmediata del indicador de carga
         (function() {
             function forceCleanup() {
-                // Detectar si es desktop
-                const isDesktop = window.innerWidth > 768;
-                console.log(`🖥️ Dispositivo detectado: ${isDesktop ? 'Desktop' : 'Móvil'}`);
+                console.log('🧹 Iniciando limpieza...');
                 
-                // Eliminar específicamente el modal de carga que se ve en la imagen
-                const loadingModals = document.querySelectorAll('div');
-                loadingModals.forEach(div => {
-                    if (div.textContent && div.textContent.includes('Cargando biblioteca')) {
-                        div.remove();
-                        console.log('🧹 Modal de carga removido');
-                    }
-                });
+                // Eliminar específicamente el modal de carga
+                const libraryLoading = document.getElementById('library-loading');
+                if (libraryLoading) {
+                    libraryLoading.remove();
+                    console.log('🧹 Indicador de carga removido por ID');
+                }
                 
-                // Eliminar elementos con spinner
-                const spinners = document.querySelectorAll('.spinner, [class*="spinner"]');
-                spinners.forEach(spinner => {
-                    spinner.closest('div').remove();
-                    console.log('🧹 Spinner removido');
-                });
-                
-                // Eliminar elementos blancos que puedan ser el modal
-                const whiteElements = document.querySelectorAll('div');
-                whiteElements.forEach(el => {
-                    const style = window.getComputedStyle(el);
-                    if (style.backgroundColor === 'rgb(255, 255, 255)' && 
-                        el.textContent && el.textContent.includes('Cargando')) {
+                // Buscar elementos con clase 'loading' que contengan texto específico
+                const loadingElements = document.querySelectorAll('.loading');
+                loadingElements.forEach(el => {
+                    if (el.textContent && el.textContent.includes('Cargando biblioteca')) {
                         el.remove();
-                        console.log('🧹 Elemento blanco de carga removido');
+                        console.log('🧹 Elemento de carga removido por clase');
                     }
                 });
                 
-                // Corregir fondo azul/oscuro - más agresivo en desktop
+                // Corregir fondo de manera suave
                 if (document.body) {
-                    document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important';
-                    document.body.style.backgroundColor = '#ffffff !important';
-                    document.body.style.cssText += '; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;';
+                    document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                    document.body.style.backgroundColor = 'transparent';
                 }
                 if (document.documentElement) {
-                    document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important';
-                    document.documentElement.style.backgroundColor = '#ffffff !important';
-                    document.documentElement.style.cssText += '; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;';
-                }
-                
-                // En desktop, forzar más agresivamente
-                if (isDesktop) {
-                    // Eliminar cualquier estilo inline que pueda estar causando el azul
-                    const allElements = document.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        if (el.style.background === 'blue' || el.style.backgroundColor === 'blue') {
-                            el.style.background = 'transparent';
-                            el.style.backgroundColor = 'transparent';
-                            console.log('🎨 Elemento azul corregido en desktop');
-                        }
-                    });
-                    
-                    // Forzar el fondo en el HTML también
-                    if (document.documentElement) {
-                        document.documentElement.setAttribute('style', 'background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;');
-                    }
+                    document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                    document.documentElement.style.backgroundColor = 'transparent';
                 }
                 
                 // Asegurar que el contenido principal sea visible
@@ -1486,16 +1453,7 @@
                     mainContainer.style.opacity = '1';
                 }
                 
-                // Mostrar todos los elementos que puedan estar ocultos
-                const hiddenElements = document.querySelectorAll('[style*="display: none"], [style*="visibility: hidden"]');
-                hiddenElements.forEach(el => {
-                    if (!el.textContent.includes('Cargando')) {
-                        el.style.display = 'block';
-                        el.style.visibility = 'visible';
-                    }
-                });
-                
-                console.log('🧹 Limpieza completa realizada');
+                console.log('🧹 Limpieza completada');
             }
             
             // Ejecutar inmediatamente
@@ -1508,12 +1466,9 @@
                 forceCleanup();
             }
             
-            // Y también después de múltiples timeouts para asegurar
+            // Y también después de timeouts
             setTimeout(forceCleanup, 100);
             setTimeout(forceCleanup, 500);
-            setTimeout(forceCleanup, 1000);
-            setTimeout(forceCleanup, 2000);
-            setTimeout(forceCleanup, 3000); // Extra timeout para desktop
         })();
     </script>
 
