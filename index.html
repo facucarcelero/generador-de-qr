@@ -3,12 +3,8 @@
 <head>
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="-1">
-    <meta http-equiv="Last-Modified" content="2024-07-28T22:17:00Z">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V34 - FORCE UPDATE - 2024-07-28-22:17</title>
+    <title>Generador QR Los Nogales - V18 - RESTORED WORKING VERSION</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1417,13 +1413,11 @@
         // Forzar eliminación inmediata del indicador de carga
         (function() {
             function forceCleanup() {
-                console.log('🧹 Iniciando limpieza...');
-                
-                // Eliminar específicamente el modal de carga
+                // Solo eliminar elementos específicos de carga
                 const libraryLoading = document.getElementById('library-loading');
                 if (libraryLoading) {
                     libraryLoading.remove();
-                    console.log('🧹 Indicador de carga removido por ID');
+                    console.log('🧹 Indicador de carga removido');
                 }
                 
                 // Buscar elementos con clase 'loading' que contengan texto específico
@@ -1435,7 +1429,13 @@
                     }
                 });
                 
-                // Corregir fondo de manera suave
+                // Corregir fondo azul solo si es necesario
+                if (document.body && document.body.style.background === 'blue') {
+                    document.body.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                    console.log('🎨 Fondo corregido');
+                }
+                
+                // Forzar corrección del fondo azul de manera más agresiva
                 if (document.body) {
                     document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
                     document.body.style.backgroundColor = 'transparent';
@@ -1445,15 +1445,26 @@
                     document.documentElement.style.backgroundColor = 'transparent';
                 }
                 
-                // Asegurar que el contenido principal sea visible
-                const mainContainer = document.querySelector('.main-container');
-                if (mainContainer) {
-                    mainContainer.style.display = 'block';
-                    mainContainer.style.visibility = 'visible';
-                    mainContainer.style.opacity = '1';
+                // Asegurar que el HTML también tenga el fondo correcto
+                if (document.documentElement) {
+                    document.documentElement.style.cssText += '; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;';
                 }
                 
-                console.log('🧹 Limpieza completada');
+                // Mostrar el contenido principal si está oculto
+                const mainContent = document.querySelector('.main-container');
+                if (mainContent && mainContent.style.display === 'none') {
+                    mainContent.style.display = 'block';
+                    console.log('📱 Contenido principal mostrado');
+                }
+                
+                // Mostrar canvases QR si están ocultos
+                const canvases = document.querySelectorAll('canvas');
+                canvases.forEach(canvas => {
+                    if (canvas.style.display === 'none' && canvas.width > 0) {
+                        canvas.style.display = 'block';
+                        console.log('🔍 Canvas QR mostrado');
+                    }
+                });
             }
             
             // Ejecutar inmediatamente
@@ -1466,7 +1477,7 @@
                 forceCleanup();
             }
             
-            // Y también después de timeouts
+            // Y también después de un timeout
             setTimeout(forceCleanup, 100);
             setTimeout(forceCleanup, 500);
         })();
@@ -3235,5 +3246,4 @@
         }
     </script>
 </body>
-</html> 
 </html> 
