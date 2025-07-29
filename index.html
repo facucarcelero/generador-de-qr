@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V46</title>
+    <title>Generador de QR - Los Nogales - V47</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1616,6 +1616,9 @@
                 <button class="btn btn-secondary" onclick="regenerateQR()" id="regenerateBtn" style="display: none;">
                     🔄 Regenerar QR
                 </button>
+                <button class="btn btn-secondary" onclick="createNewQR()" id="createNewBtn" style="display: none;">
+                    ➕ Crear Nuevo QR
+                </button>
                 <button class="btn btn-secondary" onclick="saveChanges()" id="saveChangesBtn" style="display: none;">
                     💾 Guardar Cambios
                 </button>
@@ -2459,10 +2462,12 @@
         // Función para mostrar botones de acción
         function showActionButtons() {
             const regenerateBtn = document.getElementById('regenerateBtn');
+            const createNewBtn = document.getElementById('createNewBtn');
             const saveChangesBtn = document.getElementById('saveChangesBtn');
             const generateBtn = document.querySelector('.btn-primary');
             
             if (regenerateBtn) regenerateBtn.style.display = 'inline-flex';
+            if (createNewBtn) createNewBtn.style.display = 'inline-flex';
             if (generateBtn) generateBtn.style.display = 'none';
             if (saveChangesBtn) saveChangesBtn.style.display = 'none';
         }
@@ -3376,6 +3381,42 @@
                 console.error('Error al obtener imagen del QR:', error);
                 return null;
             }
+        }
+
+        // Función para crear un nuevo QR (limpiar formulario y estado)
+        function createNewQR() {
+            // Limpiar formulario
+            document.getElementById('qrUrl').value = '';
+            document.getElementById('qrTitle').value = '';
+            document.getElementById('qrDescription').value = '';
+            document.getElementById('qrSize').value = '300';
+            document.getElementById('foregroundColor').value = '#000000';
+            document.getElementById('foregroundHex').value = '#000000';
+            document.getElementById('backgroundColor').value = '#FFFFFF';
+            document.getElementById('backgroundColorHex').value = '#FFFFFF';
+            document.getElementById('errorCorrection').value = 'M';
+            document.getElementById('quietZoneSize').value = '0';
+            document.getElementById('quietZoneSizeValue').textContent = '0px';
+            document.getElementById('qrType').value = 'static';
+
+            // Limpiar contenedor del QR
+            const container = document.getElementById('qrContainer');
+            container.innerHTML = '<p style="color: #6b7280;">Ingresa una URL para generar el código QR</p>';
+
+            // Limpiar información del QR
+            const qrInfo = document.getElementById('qrInfo');
+            if (qrInfo) qrInfo.style.display = 'none';
+
+            // Limpiar datos del QR actual
+            currentQRData = null;
+
+            // Mostrar botón de generar y ocultar otros
+            document.querySelector('.btn-primary').style.display = 'inline-flex';
+            document.getElementById('regenerateBtn').style.display = 'none';
+            document.getElementById('createNewBtn').style.display = 'none';
+            document.getElementById('saveChangesBtn').style.display = 'none';
+
+            showMessage('Formulario limpiado. Listo para crear un nuevo QR', 'success');
         }
     </script>
 
