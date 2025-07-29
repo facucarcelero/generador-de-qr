@@ -3245,5 +3245,51 @@
             }
         }
     </script>
+
+    <!-- Script específico para corregir fondo azul en computadora -->
+    <script>
+        // Solo ejecutar en desktop para corregir fondo azul
+        (function() {
+            function fixDesktopBackground() {
+                // Solo en desktop (pantalla ancha)
+                if (window.innerWidth > 768) {
+                    console.log('🖥️ Corrigiendo fondo en desktop...');
+                    
+                    // Corregir fondo azul en desktop
+                    if (document.body) {
+                        document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                        document.body.style.backgroundColor = 'transparent';
+                    }
+                    if (document.documentElement) {
+                        document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
+                        document.documentElement.style.backgroundColor = 'transparent';
+                    }
+                    
+                    // Buscar y corregir elementos con fondo azul
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(el => {
+                        const style = window.getComputedStyle(el);
+                        if (style.background === 'blue' || style.backgroundColor === 'blue') {
+                            el.style.background = 'transparent';
+                            el.style.backgroundColor = 'transparent';
+                        }
+                    });
+                    
+                    console.log('✅ Fondo corregido en desktop');
+                }
+            }
+            
+            // Ejecutar cuando el DOM esté listo
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fixDesktopBackground);
+            } else {
+                fixDesktopBackground();
+            }
+            
+            // También ejecutar después de un tiempo
+            setTimeout(fixDesktopBackground, 100);
+            setTimeout(fixDesktopBackground, 500);
+        })();
+    </script>
 </body>
 </html> 
