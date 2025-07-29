@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador QR Los Nogales - V18 - RESTORED WORKING VERSION</title>
+    <title>Generador de QR - Los Nogales - V45</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -2542,33 +2542,42 @@
 
             const qrType = document.getElementById('qrType').value;
             let savedQRs = safeGetItem('savedQRs', []);
-            
-            // Verificar si ya existe un QR con ese nombre
             const existingIndex = savedQRs.findIndex(qr => qr.name === name);
+
+            // Obtener imagen del canvas de manera más robusta
+            let imageData = null;
+            const qrContainer = document.getElementById('qrContainer');
             
+            if (qrContainer) {
+                const canvas = qrContainer.querySelector('canvas');
+                if (canvas) {
+                    try {
+                        imageData = canvas.toDataURL('image/png');
+                    } catch (error) {
+                        console.error('Error al obtener imagen del QR:', error);
+                    }
+                } else {
+                    // Si no hay canvas, buscar una imagen
+                    const img = qrContainer.querySelector('img');
+                    if (img && img.src) {
+                        imageData = img.src;
+                    }
+                }
+            }
+
+            // Si no se pudo obtener la imagen, mostrar error
+            if (!imageData) {
+                showMessage('Error: No se pudo obtener la imagen del QR. Intenta regenerar el QR.', 'error');
+                return;
+            }
+
             const qrData = {
                 id: existingIndex >= 0 ? savedQRs[existingIndex].id : generateId(),
                 name: name,
                 type: qrType,
                 originalUrl: currentQRData.url, // Guardar la URL original
                 timestamp: new Date().toISOString(),
-                imageData: (() => {
-                    // Obtener imagen del canvas directamente
-                    const qrContainer = document.getElementById('qrContainer');
-                    const canvas = qrContainer ? qrContainer.querySelector('canvas') : null;
-                    
-                    if (!canvas) {
-                        console.error('No se encontró canvas del QR');
-                        return null;
-                    }
-                    
-                    try {
-                        return canvas.toDataURL('image/png');
-                    } catch (error) {
-                        console.error('Error al obtener imagen del QR:', error);
-                        return null;
-                    }
-                })(),
+                imageData: imageData,
                 // Guardar configuración para poder editar
                 size: document.getElementById('qrSize').value,
                 colors: {
@@ -2577,12 +2586,6 @@
                 },
                 errorCorrection: document.getElementById('errorCorrection').value
             };
-
-            // Verificar que se pudo obtener la imagen
-            if (!qrData.imageData) {
-                showMessage('Error: No se pudo obtener la imagen del QR. Intenta regenerar el QR.', 'error');
-                return;
-            }
 
             // Para QRs dinámicos, crear una URL con parámetros en lugar de usar localStorage
             if (qrType === 'dynamic') {
