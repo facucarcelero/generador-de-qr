@@ -2552,7 +2552,7 @@
                 type: qrType,
                 originalUrl: currentQRData.url, // Guardar la URL original
                 timestamp: new Date().toISOString(),
-                imageData: currentQRData.canvas.toDataURL(), // Guardar como imagen
+                imageData: getQRImageData(), // Usar función para obtener imagen
                 // Guardar configuración para poder editar
                 size: document.getElementById('qrSize').value,
                 colors: {
@@ -3250,6 +3250,24 @@
                     }
                 `;
                 document.head.appendChild(style);
+            }
+        }
+
+        // Función para obtener la imagen del QR del canvas
+        function getQRImageData() {
+            const qrContainer = document.getElementById('qrContainer');
+            const canvas = qrContainer.querySelector('canvas');
+            
+            if (!canvas) {
+                console.error('No se encontró canvas del QR');
+                return null;
+            }
+            
+            try {
+                return canvas.toDataURL('image/png');
+            } catch (error) {
+                console.error('Error al obtener imagen del QR:', error);
+                return null;
             }
         }
     </script>
