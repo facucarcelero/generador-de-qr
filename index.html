@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V47</title>
+    <title>Generador de QR - Los Nogales - V48</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -1622,6 +1622,9 @@
                 <button class="btn btn-secondary" onclick="saveChanges()" id="saveChangesBtn" style="display: none;">
                     💾 Guardar Cambios
                 </button>
+                <button class="btn btn-secondary" onclick="cancelEdit()" id="cancelEditBtn" style="display: none;">
+                    ❌ Cancelar
+                </button>
                 <button class="btn btn-secondary" onclick="downloadQR()">
                     💾 Descargar
                 </button>
@@ -2410,26 +2413,64 @@
                 return;
             }
 
-            // Actualizar todos los datos del QR actual con los valores actuales del formulario
-            currentQRData.url = document.getElementById('qrUrl').value.trim();
-            currentQRData.title = document.getElementById('qrTitle').value.trim() || 'QR sin título';
-            currentQRData.description = document.getElementById('qrDescription').value.trim();
-            currentQRData.size = parseInt(document.getElementById('qrSize').value);
-            currentQRData.colors = {
-                foreground: document.getElementById('foregroundColor').value,
-                background: document.getElementById('backgroundColor').value
-            };
-            currentQRData.errorCorrection = document.getElementById('errorCorrection').value;
-            currentQRData.quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
-            currentQRData.timestamp = new Date().toISOString();
+            // Si estamos editando un QR guardado, actualizar en localStorage
+            if (currentEditingQRId) {
+                let savedQRs = safeGetItem('savedQRs', []);
+                const qrIndex = savedQRs.findIndex(q => q.id === currentEditingQRId);
+                
+                if (qrIndex !== -1) {
+                    // Actualizar los datos del QR guardado
+                    savedQRs[qrIndex].name = document.getElementById('qrTitle').value.trim() || 'QR sin título';
+                    savedQRs[qrIndex].originalUrl = document.getElementById('qrUrl').value.trim();
+                    savedQRs[qrIndex].size = parseInt(document.getElementById('qrSize').value);
+                    savedQRs[qrIndex].colors = {
+                        foreground: document.getElementById('foregroundColor').value,
+                        background: document.getElementById('backgroundColor').value
+                    };
+                    savedQRs[qrIndex].errorCorrection = document.getElementById('errorCorrection').value;
+                    savedQRs[qrIndex].quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
+                    savedQRs[qrIndex].timestamp = new Date().toISOString();
+                    
+                    // Guardar los cambios
+                    const saveSuccess = safeSetItem('savedQRs', savedQRs);
+                    if (!saveSuccess) {
+                        showMessage('⚠️ No se pudo guardar. Verifica el almacenamiento.', 'warning');
+                        return;
+                    }
+                    
+                    showMessage('Cambios guardados exitosamente. Sistema reiniciado para crear un nuevo QR.', 'success');
+                }
+                
+                // Limpiar el ID de edición
+                currentEditingQRId = null;
+                
+                // Reiniciar el sistema
+                createNewQR();
+                
+                // Recargar la lista de QRs guardados
+                loadSavedQRs();
+            } else {
+                // Para QRs no guardados, solo actualizar los datos locales
+                currentQRData.url = document.getElementById('qrUrl').value.trim();
+                currentQRData.title = document.getElementById('qrTitle').value.trim() || 'QR sin título';
+                currentQRData.description = document.getElementById('qrDescription').value.trim();
+                currentQRData.size = parseInt(document.getElementById('qrSize').value);
+                currentQRData.colors = {
+                    foreground: document.getElementById('foregroundColor').value,
+                    background: document.getElementById('backgroundColor').value
+                };
+                currentQRData.errorCorrection = document.getElementById('errorCorrection').value;
+                currentQRData.quietZoneSize = parseInt(document.getElementById('quietZoneSize').value);
+                currentQRData.timestamp = new Date().toISOString();
 
-            // Ocultar botón de guardar cambios
-            document.getElementById('saveChangesBtn').style.display = 'none';
+                // Ocultar botón de guardar cambios
+                document.getElementById('saveChangesBtn').style.display = 'none';
 
-            // Actualizar información mostrada
-            showQRInfo();
+                // Actualizar información mostrada
+                showQRInfo();
 
-            showMessage('Cambios guardados exitosamente', 'success');
+                showMessage('Cambios guardados exitosamente', 'success');
+            }
         }
 
         // Función para mostrar que hay cambios pendientes
@@ -2823,6 +2864,9 @@
             const qr = savedQRs.find(q => q.id === qrId);
             if (!qr) return;
 
+            // Guardar el ID del QR que se está editando
+            currentEditingQRId = qrId;
+
             // Cargar datos en el formulario
             document.getElementById('qrType').value = qr.type || 'static';
             document.getElementById('qrUrl').value = qr.originalUrl || qr.url;
@@ -2833,6 +2877,8 @@
             document.getElementById('backgroundColor').value = qr.colors?.background || '#FFFFFF';
             document.getElementById('backgroundColorHex').value = qr.colors?.background || '#FFFFFF';
             document.getElementById('errorCorrection').value = qr.errorCorrection || 'M';
+            document.getElementById('quietZoneSize').value = qr.quietZoneSize || '0';
+            document.getElementById('quietZoneSizeValue').textContent = (qr.quietZoneSize || '0') + 'px';
 
             // Cargar el QR existente en lugar de regenerarlo
             if (qr.imageData) {
@@ -2847,23 +2893,39 @@
                     size: qr.size || 300,
                     colors: qr.colors || { foreground: '#000000', background: '#FFFFFF' },
                     errorCorrection: qr.errorCorrection || 'M',
+                    quietZoneSize: qr.quietZoneSize || 0,
                     timestamp: qr.timestamp,
                     qrText: qr.originalUrl || qr.url,
                     isDemo: false
                 };
 
-                // Mostrar botones de acción
-                document.getElementById('regenerateBtn').style.display = 'inline-flex';
+                // Mostrar botones de edición
+                document.getElementById('regenerateBtn').style.display = 'none';
                 document.querySelector('.btn-primary').style.display = 'none';
-                document.getElementById('saveChangesBtn').style.display = 'none';
+                document.getElementById('createNewBtn').style.display = 'none';
+                document.getElementById('saveChangesBtn').style.display = 'inline-flex';
+                document.getElementById('cancelEditBtn').style.display = 'inline-flex';
 
                 // Mostrar información del QR
                 showQRInfo();
                 
-                showMessage('QR cargado para edición. Modifica los parámetros y usa "Guardar Cambios" para actualizar.', 'success');
+                showMessage('QR cargado para edición. Modifica los parámetros y usa "Guardar Cambios" para actualizar o "Cancelar" para descartar cambios.', 'success');
             } else {
                 // Si no hay imagen guardada, generar el QR
                 generateQR();
+            }
+        }
+
+        // Función para cancelar la edición de un QR
+        function cancelEdit() {
+            if (currentEditingQRId) {
+                // Limpiar el ID de edición
+                currentEditingQRId = null;
+                
+                // Limpiar formulario y estado
+                createNewQR();
+                
+                showMessage('Edición cancelada. Sistema reiniciado para crear un nuevo QR.', 'success');
             }
         }
 
