@@ -2699,22 +2699,31 @@
             let savedQRs = safeGetItem('savedQRs', []);
             const qrIndex = savedQRs.findIndex(q => q.id === currentEditingQRId);
             if (qrIndex !== -1) {
+                // Actualizar la URL original
                 savedQRs[qrIndex].originalUrl = newUrl;
                 savedQRs[qrIndex].timestamp = new Date().toISOString();
                 
-                // Actualizar la URL de redirección para QRs dinámicos
+                // Para QRs dinámicos, actualizar la URL de redirección
                 if (savedQRs[qrIndex].type === 'dynamic') {
-                    const encodedUrl = btoa(encodeURIComponent(newUrl));
-                    const encodedName = btoa(encodeURIComponent(savedQRs[qrIndex].name));
-                    savedQRs[qrIndex].redirectUrl = savedQRs[qrIndex].url; // Usar la URL directa
-                    savedQRs[qrIndex].url = savedQRs[qrIndex].redirectUrl;
+                    // Crear la nueva URL de redirección con parámetros
+                    const qrId = savedQRs[qrIndex].id;
+                    const qrName = savedQRs[qrIndex].name;
+                    const redirectUrl = createDynamicQRUrl(newUrl, qrId, qrName);
+                    
+                    // Actualizar las URLs
+                    savedQRs[qrIndex].url = redirectUrl; // URL con parámetros para el QR
+                    savedQRs[qrIndex].redirectUrl = newUrl; // URL final de destino
+                    
+                    // Actualizar parámetros codificados
+                    savedQRs[qrIndex].encodedUrl = btoa(encodeURIComponent(newUrl));
+                    savedQRs[qrIndex].encodedName = btoa(encodeURIComponent(qrName));
                 }
                 
                 const saveSuccess = safeSetItem('savedQRs', savedQRs);
                 if (!saveSuccess) {
                     showMessage('⚠️ No se pudo guardar la actualización. Verifica el almacenamiento.', 'warning');
                 } else {
-                    showMessage('URL del QR dinámico actualizada exitosamente', 'success');
+                    showMessage('URL del QR dinámico actualizada exitosamente. El QR seguirá siendo el mismo, pero ahora redirigirá a la nueva URL.', 'success');
                 }
                 
                 closeModal();
