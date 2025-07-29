@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V45</title>
+    <title>Generador de QR - Los Nogales - V46</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -2718,6 +2718,8 @@
             let savedQRs = safeGetItem('savedQRs', []);
             const qrIndex = savedQRs.findIndex(q => q.id === currentEditingQRId);
             if (qrIndex !== -1) {
+                const qr = savedQRs[qrIndex];
+                
                 // Actualizar la URL original
                 savedQRs[qrIndex].originalUrl = newUrl;
                 savedQRs[qrIndex].timestamp = new Date().toISOString();
@@ -2736,17 +2738,78 @@
                     // Actualizar parámetros codificados
                     savedQRs[qrIndex].encodedUrl = btoa(encodeURIComponent(newUrl));
                     savedQRs[qrIndex].encodedName = btoa(encodeURIComponent(qrName));
+                    
+                    // Regenerar el QR visual con la nueva URL
+                    regenerateQRWithNewUrl(redirectUrl, qr, savedQRs, qrIndex);
+                } else {
+                    // Para QRs estáticos, solo actualizar la URL
+                    savedQRs[qrIndex].url = newUrl;
+                    
+                    // Regenerar el QR visual con la nueva URL
+                    regenerateQRWithNewUrl(newUrl, qr, savedQRs, qrIndex);
+                }
+            }
+        }
+
+        // Función auxiliar para regenerar el QR visual con nueva URL
+        function regenerateQRWithNewUrl(newUrl, qr, savedQRs, qrIndex) {
+            // Configurar el canvas para generar el nuevo QR
+            const canvas = document.createElement('canvas');
+            canvas.width = qr.size || 300;
+            canvas.height = qr.size || 300;
+            
+            // Opciones para generar el QR
+            const options = {
+                width: qr.size || 300,
+                height: qr.size || 300,
+                colorDark: qr.colors?.foreground || '#000000',
+                colorLight: qr.colors?.background || '#FFFFFF',
+                correctLevel: getErrorCorrectionLevel(qr.errorCorrection || 'M')
+            };
+            
+            // Generar el nuevo QR
+            QRCode.toCanvas(canvas, newUrl, options, function(error, generatedCanvas) {
+                if (error) {
+                    console.error('Error al regenerar QR:', error);
+                    showMessage('Error al regenerar el QR visual: ' + error.message, 'error');
+                    return;
                 }
                 
+                // Aplicar colores personalizados
+                colorizeQRCanvas(generatedCanvas, options.colorDark, options.colorLight);
+                
+                // Aplicar quiet zone si existe
+                if (qr.quietZoneSize !== undefined && qr.quietZoneSize >= 0) {
+                    applyQuietZoneToQR(generatedCanvas, qr.quietZoneSize, options.colorLight);
+                }
+                
+                // Obtener la nueva imagen
+                const newImageData = generatedCanvas.toDataURL('image/png');
+                
+                // Actualizar la imagen en el QR guardado
+                savedQRs[qrIndex].imageData = newImageData;
+                
+                // Guardar los cambios
                 const saveSuccess = safeSetItem('savedQRs', savedQRs);
                 if (!saveSuccess) {
                     showMessage('⚠️ No se pudo guardar la actualización. Verifica el almacenamiento.', 'warning');
                 } else {
-                    showMessage('URL del QR dinámico actualizada exitosamente. El QR seguirá siendo el mismo, pero ahora redirigirá a la nueva URL.', 'success');
+                    showMessage('QR actualizado exitosamente. El código QR ahora redirigirá a la nueva URL.', 'success');
                 }
                 
                 closeModal();
                 loadSavedQRs();
+            });
+        }
+
+        // Función auxiliar para obtener el nivel de corrección de errores
+        function getErrorCorrectionLevel(level) {
+            switch(level) {
+                case 'L': return 0;
+                case 'M': return 1;
+                case 'Q': return 2;
+                case 'H': return 3;
+                default: return 1;
             }
         }
 
