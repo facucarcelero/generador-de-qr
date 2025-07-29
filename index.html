@@ -1417,6 +1417,10 @@
         // Forzar eliminación inmediata del indicador de carga
         (function() {
             function forceCleanup() {
+                // Detectar si es desktop
+                const isDesktop = window.innerWidth > 768;
+                console.log(`🖥️ Dispositivo detectado: ${isDesktop ? 'Desktop' : 'Móvil'}`);
+                
                 // Eliminar específicamente el modal de carga que se ve en la imagen
                 const loadingModals = document.querySelectorAll('div');
                 loadingModals.forEach(div => {
@@ -1444,14 +1448,34 @@
                     }
                 });
                 
-                // Corregir fondo oscuro - forzar fondo claro
+                // Corregir fondo azul/oscuro - más agresivo en desktop
                 if (document.body) {
                     document.body.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important';
                     document.body.style.backgroundColor = '#ffffff !important';
+                    document.body.style.cssText += '; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;';
                 }
                 if (document.documentElement) {
                     document.documentElement.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important';
                     document.documentElement.style.backgroundColor = '#ffffff !important';
+                    document.documentElement.style.cssText += '; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;';
+                }
+                
+                // En desktop, forzar más agresivamente
+                if (isDesktop) {
+                    // Eliminar cualquier estilo inline que pueda estar causando el azul
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(el => {
+                        if (el.style.background === 'blue' || el.style.backgroundColor === 'blue') {
+                            el.style.background = 'transparent';
+                            el.style.backgroundColor = 'transparent';
+                            console.log('🎨 Elemento azul corregido en desktop');
+                        }
+                    });
+                    
+                    // Forzar el fondo en el HTML también
+                    if (document.documentElement) {
+                        document.documentElement.setAttribute('style', 'background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;');
+                    }
                 }
                 
                 // Asegurar que el contenido principal sea visible
@@ -1489,6 +1513,7 @@
             setTimeout(forceCleanup, 500);
             setTimeout(forceCleanup, 1000);
             setTimeout(forceCleanup, 2000);
+            setTimeout(forceCleanup, 3000); // Extra timeout para desktop
         })();
     </script>
 
