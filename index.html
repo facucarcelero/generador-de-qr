@@ -2456,15 +2456,41 @@
             img.src = URL.createObjectURL(logoFile);
         }
 
-        function showQRInfo() {
-            if (!currentQRData) return;
-
-            document.getElementById('currentUrl').textContent = currentQRData.url;
-            document.getElementById('currentTitle').textContent = currentQRData.title;
-            document.getElementById('currentSize').textContent = currentQRData.size + 'px';
-            document.getElementById('currentDate').textContent = new Date(currentQRData.timestamp).toLocaleString('es-ES');
+        // Función para mostrar botones de acción
+        function showActionButtons() {
+            const regenerateBtn = document.getElementById('regenerateBtn');
+            const saveChangesBtn = document.getElementById('saveChangesBtn');
+            const generateBtn = document.querySelector('.btn-primary');
             
-            document.getElementById('qrInfo').style.display = 'block';
+            if (regenerateBtn) regenerateBtn.style.display = 'inline-flex';
+            if (generateBtn) generateBtn.style.display = 'none';
+            if (saveChangesBtn) saveChangesBtn.style.display = 'none';
+        }
+
+        // Función para mostrar información del QR
+        function showQRInfo() {
+            const qrInfo = document.getElementById('qrInfo');
+            if (!qrInfo || !currentQRData) return;
+            
+            const url = currentQRData.url || 'Sin URL';
+            const name = currentQRData.name || 'QR sin título';
+            const size = currentQRData.size || 300;
+            const timestamp = currentQRData.timestamp ? new Date(currentQRData.timestamp).toLocaleString() : new Date().toLocaleString();
+            
+            qrInfo.innerHTML = `
+                <div class="qr-info-item">
+                    <strong>URL:</strong> <span>${url}</span>
+                </div>
+                <div class="qr-info-item">
+                    <strong>Nombre:</strong> <span>${name}</span>
+                </div>
+                <div class="qr-info-item">
+                    <strong>Tamaño:</strong> <span>${size}px</span>
+                </div>
+                <div class="qr-info-item">
+                    <strong>Generado:</strong> <span>${timestamp}</span>
+                </div>
+            `;
         }
 
         function downloadQR() {
