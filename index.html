@@ -2578,6 +2578,12 @@
                 errorCorrection: document.getElementById('errorCorrection').value
             };
 
+            // Verificar que se pudo obtener la imagen
+            if (!qrData.imageData) {
+                showMessage('Error: No se pudo obtener la imagen del QR. Intenta regenerar el QR.', 'error');
+                return;
+            }
+
             // Para QRs dinámicos, crear una URL con parámetros en lugar de usar localStorage
             if (qrType === 'dynamic') {
                 // Codificar la URL en base64 para evitar problemas con caracteres especiales
@@ -2632,10 +2638,13 @@
                     '<span class="qr-type-badge dynamic">Dinámico</span>' : 
                     '<span class="qr-type-badge static">Estático</span>';
                 
+                // Verificar que imageData existe y no es null
+                const imageSrc = qr.imageData || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+                
                 card.innerHTML = `
-                    <img src="${qr.imageData}" alt="QR Code">
+                    <img src="${imageSrc}" alt="QR Code" onerror="this.style.display='none'">
                     <h4>${qr.name} ${typeBadge}</h4>
-                    <p>${qr.originalUrl || qr.url}</p>
+                    <p>${qr.originalUrl || qr.url || 'Sin URL'}</p>
                     <p><small>${new Date(qr.timestamp).toLocaleDateString('es-ES')}</small></p>
                     <div class="qr-actions">
                         <button class="btn btn-primary btn-small" onclick="editQR('${qr.id}')">
@@ -2672,6 +2681,13 @@
             }
             
             displayQRs(filteredQRs);
+        }
+
+        // Función para crear URL de QR dinámico con parámetros
+        function createDynamicQRUrl(originalUrl, qrId, qrName) {
+            // Si no es una URL válida, agregar parámetros al final
+            const separator = originalUrl.includes('?') ? '&' : '?';
+            return `${originalUrl}${separator}qr_id=${qrId}&qr_name=${encodeURIComponent(qrName)}`;
         }
 
         function manageDynamicQR(qrId) {
