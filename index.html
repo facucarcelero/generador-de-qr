@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V48</title>
+    <title>Generador de QR - Los Nogales - V49</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -2860,10 +2860,17 @@
         }
 
         function editQR(qrId) {
+            console.log('Función editQR llamada con ID:', qrId);
+            
             const savedQRs = safeGetItem('savedQRs', []);
             const qr = savedQRs.find(q => q.id === qrId);
-            if (!qr) return;
+            if (!qr) {
+                console.error('QR no encontrado con ID:', qrId);
+                return;
+            }
 
+            console.log('QR encontrado:', qr.name);
+            
             // Guardar el ID del QR que se está editando
             currentEditingQRId = qrId;
 
@@ -2905,6 +2912,11 @@
                 document.getElementById('createNewBtn').style.display = 'none';
                 document.getElementById('saveChangesBtn').style.display = 'inline-flex';
                 document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+
+                // Debug: Verificar que los botones se muestren
+                console.log('Botones de edición mostrados:');
+                console.log('saveChangesBtn display:', document.getElementById('saveChangesBtn').style.display);
+                console.log('cancelEditBtn display:', document.getElementById('cancelEditBtn').style.display);
 
                 // Mostrar información del QR
                 showQRInfo();
