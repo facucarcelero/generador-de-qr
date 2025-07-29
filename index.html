@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- V5 - SOLUCIÓN DEFINITIVA: Eliminar redirecciones de Netlify -->
-    <title>Generador de QR - Los Nogales - V50</title>
+    <title>Generador de QR - Los Nogales - V51</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981">
@@ -273,7 +273,8 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            color: #000000;
         }
 
         .header-content {
@@ -394,12 +395,13 @@
             border: 1px solid rgba(229, 231, 235, 0.5);
             border-radius: 16px;
             padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
+            color: #000000;
         }
 
         .form-section:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
             transform: translateY(-2px);
         }
 
@@ -409,6 +411,7 @@
             margin-bottom: 2rem;
             position: relative;
             padding-bottom: 0.5rem;
+            color: #000000;
         }
 
         .section-title::after {
@@ -430,7 +433,7 @@
             display: block;
             font-weight: 600;
             margin-bottom: 0.75rem;
-            color: #374151;
+            color: #000000;
             font-size: 1rem;
         }
 
@@ -443,6 +446,7 @@
             transition: all 0.3s ease;
             background: white;
             font-family: inherit;
+            color: #000000;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -468,9 +472,9 @@
             flex-direction: column;
             gap: 0.75rem;
             padding: 1.5rem;
-            background: #f8fafc;
+            background: #374151;
             border-radius: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #4b5563;
         }
 
         .color-input-header {
@@ -478,7 +482,7 @@
             align-items: center;
             gap: 0.75rem;
             font-weight: 600;
-            color: #374151;
+            color: #000000;
             font-size: 1rem;
         }
 
@@ -527,9 +531,9 @@
             flex-direction: column;
             gap: 1.5rem;
             padding: 1.5rem;
-            background: #f8fafc;
+            background: #374151;
             border-radius: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #4b5563;
         }
 
         .quiet-zone-option {
@@ -543,7 +547,7 @@
             align-items: center;
             gap: 0.75rem;
             font-weight: 600;
-            color: #374151;
+            color: #000000;
             font-size: 1rem;
         }
 
@@ -695,14 +699,15 @@
             border-radius: 16px;
             padding: 2rem;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
             position: sticky;
             top: 100px;
+            color: #000000;
         }
 
         .qr-section:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
             transform: translateY(-2px);
         }
 
@@ -1212,11 +1217,15 @@
             .header {
                 background: rgba(255, 255, 255, 0.95);
                 border-bottom-color: rgba(75, 85, 99, 0.5);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                color: #000000;
             }
 
             .form-section, .qr-section, .qr-card {
                 background: rgba(255, 255, 255, 0.9);
                 border-color: rgba(75, 85, 99, 0.5);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                color: #000000;
             }
 
             .form-input, .form-select, .form-textarea {
@@ -1228,6 +1237,14 @@
             .color-input, .quiet-zone-controls {
                 background: #374151;
                 border-color: #4b5563;
+            }
+
+            .section-title {
+                color: #000000;
+            }
+
+            .form-label {
+                color: #000000;
             }
         }
 
