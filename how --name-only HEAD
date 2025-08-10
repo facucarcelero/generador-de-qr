@@ -1,0 +1,11 @@
+[33mcommit 62c54d4e8935348eac31849ebda09d262c1522d7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: facu <facucarcelero6@gmail.com>
+Date:   Sun Aug 10 11:01:16 2025 -0300
+
+    ✨ Agregada compatibilidad móvil universal para QRs
+
+ README-QR-System.md            |  33 [32m+++[m
+ index.html                     | 571 [32m++++++++++++++++++++++++++++++++++++++++[m[31m-[m
+ mobile-compatibility-test.html | 340 [32m++++++++++++++++++++++++[m
+ survey-template.html           | 343 [32m+++++++++++++++++++++++++[m
+ 4 files changed, 1278 insertions(+), 9 deletions(-)
