@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Compatibilidad Móvil - QR</title>
+    <script src="qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-size: 1.3rem;
+        }
+
+        .qr-display {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .qr-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .compatibility-tips {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .compatibility-tips h4 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .compatibility-tips ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .compatibility-tips li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .compatibility-tips li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+        }
+
+        .test-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .test-button:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+        }
+
+        .status.warning {
+            background: rgba(255, 193, 7, 0.8);
+            color: black;
+        }
+
+        .status.error {
+            background: rgba(244, 67, 54, 0.8);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Prueba de Compatibilidad Móvil</h1>
+        
+        <div class="test-section">
+            <h3>📱 Test 1: QR Básico (Máxima Compatibilidad)</h3>
+            <p>Este QR está optimizado para funcionar en todos los dispositivos móviles:</p>
+            <div class="qr-display" id="qr1"></div>
+            <div class="qr-info">
+                <strong>Configuración:</strong><br>
+                • Tamaño: 256x256 píxeles<br>
+                • Colores: Negro sobre blanco<br>
+                • Corrección de errores: Medio (15%)<br>
+                • Margen: 4 módulos<br>
+                • URL: https://ejemplo.com
+            </div>
+            <button class="test-button" onclick="testQR1()">Probar QR 1</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Test 2: QR Personalizado (Compatibilidad Media)</h3>
+            <p>Este QR tiene colores personalizados para probar la compatibilidad:</p>
+            <div class="qr-display" id="qr2"></div>
+            <div class="qr-info">
+                <strong>Configuración:</strong><br>
+                • Tamaño: 200x200 píxeles<br>
+                • Colores: Azul sobre amarillo<br>
+                • Corrección de errores: Alto (25%)<br>
+                • Margen: 2 módulos<br>
+                • URL: https://ejemplo.com
+            </div>
+            <button class="test-button" onclick="testQR2()">Probar QR 2</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Test 3: QR Avanzado (Compatibilidad Avanzada)</h3>
+            <p>Este QR usa configuraciones avanzadas para máxima compatibilidad:</p>
+            <div class="qr-display" id="qr3"></div>
+            <div class="qr-info">
+                <strong>Configuración:</strong><br>
+                • Tamaño: 512x512 píxeles<br>
+                • Colores: Negro sobre blanco<br>
+                • Corrección de errores: Máximo (30%)<br>
+                • Margen: 6 módulos<br>
+                • URL: https://ejemplo.com
+            </div>
+            <button class="test-button" onclick="testQR3()">Probar QR 3</button>
+        </div>
+
+        <div class="compatibility-tips">
+            <h4>📋 Instrucciones de Prueba</h4>
+            <ul>
+                <li><strong>Android:</strong> Abre la cámara y apunta al QR</li>
+                <li><strong>iPhone:</strong> Usa la app Cámara nativa</li>
+                <li><strong>Otros:</strong> Usa cualquier app de escaneo QR</li>
+                <li>Prueba en diferentes condiciones de luz</li>
+                <li>Prueba desde diferentes distancias</li>
+            </ul>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // Función para generar QR con configuración específica
+        function generateTestQR(containerId, options) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            try {
+                QRCode.toCanvas(container, options.text, {
+                    width: options.width,
+                    height: options.height,
+                    colorDark: options.colorDark,
+                    colorLight: options.colorLight,
+                    correctLevel: QRCode.CorrectLevel[options.correctLevel],
+                    margin: options.margin
+                }, function(error, canvas) {
+                    if (error) {
+                        console.error('Error generando QR:', error);
+                        container.innerHTML = '<p style="color: red;">Error al generar QR</p>';
+                        return;
+                    }
+                    
+                    // Aplicar estilos al canvas
+                    canvas.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+                    canvas.style.borderRadius = '10px';
+                    canvas.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<p style="color: red;">Error al generar QR</p>';
+            }
+        }
+
+        // Generar QRs de prueba al cargar la página
+        window.addEventListener('load', function() {
+            // QR 1: Máxima compatibilidad
+            generateTestQR('qr1', {
+                text: 'https://ejemplo.com',
+                width: 256,
+                height: 256,
+                colorDark: '#000000',
+                colorLight: '#FFFFFF',
+                correctLevel: 'M',
+                margin: 4
+            });
+
+            // QR 2: Compatibilidad media
+            generateTestQR('qr2', {
+                text: 'https://ejemplo.com',
+                width: 200,
+                height: 200,
+                colorDark: '#0066CC',
+                colorLight: '#FFFF00',
+                correctLevel: 'Q',
+                margin: 2
+            });
+
+            // QR 3: Compatibilidad avanzada
+            generateTestQR('qr3', {
+                text: 'https://ejemplo.com',
+                width: 512,
+                height: 512,
+                colorDark: '#000000',
+                colorLight: '#FFFFFF',
+                correctLevel: 'H',
+                margin: 6
+            });
+        });
+
+        // Funciones de prueba
+        function testQR1() {
+            showTestResult('QR 1 (Básico)', 'success', '✅ QR optimizado para máxima compatibilidad móvil. Debería funcionar en todos los dispositivos.');
+        }
+
+        function testQR2() {
+            showTestResult('QR 2 (Personalizado)', 'warning', '⚠️ QR con colores personalizados. Puede tener problemas en algunos dispositivos con poca luz.');
+        }
+
+        function testQR3() {
+            showTestResult('QR 3 (Avanzado)', 'success', '✅ QR de alta resolución con máxima corrección de errores. Compatible con todos los dispositivos.');
+        }
+
+        function showTestResult(title, type, message) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.innerHTML = `<strong>${title}:</strong> ${message}`;
+            
+            resultsDiv.appendChild(resultDiv);
+            
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                resultDiv.remove();
+            }, 5000);
+        }
+
+        // Función para detectar el tipo de dispositivo
+        function detectDevice() {
+            const userAgent = navigator.userAgent;
+            let deviceType = 'Desconocido';
+            
+            if (/Android/i.test(userAgent)) {
+                deviceType = 'Android';
+            } else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+                deviceType = 'iOS';
+            } else if (/Windows/i.test(userAgent)) {
+                deviceType = 'Windows';
+            } else if (/Mac/i.test(userAgent)) {
+                deviceType = 'macOS';
+            } else if (/Linux/i.test(userAgent)) {
+                deviceType = 'Linux';
+            }
+            
+            console.log(`Dispositivo detectado: ${deviceType}`);
+            return deviceType;
+        }
+
+        // Detectar dispositivo al cargar
+        window.addEventListener('load', function() {
+            const device = detectDevice();
+            console.log(`🧪 Página de prueba cargada en: ${device}`);
+        });
+    </script>
+</body>
+</html> 

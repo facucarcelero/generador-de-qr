@@ -126,6 +126,39 @@ qr-redirect.html?id=ABC123&url=base64_encoded_url&name=base64_encoded_name
 - Los logos muy grandes pueden afectar la escaneabilidad
 - El nivel de corrección de errores H permite más personalización
 
+## 📱 Compatibilidad Móvil
+
+### ✅ Dispositivos Soportados
+- **Android**: Todas las versiones y aplicaciones de cámara
+- **iPhone**: Aplicación Cámara nativa y apps de terceros
+- **Otros**: Cualquier dispositivo que soporte códigos QR estándar
+
+### 🔧 Optimizaciones Implementadas
+- **Tamaño mínimo**: 256x256 píxeles para mejor detección
+- **Corrección de errores**: Nivel M (15%) como mínimo recomendado
+- **Contraste máximo**: Opción para forzar negro sobre blanco
+- **Borde de seguridad**: Margen aumentado para mejor escaneo
+- **Protocolo HTTPS**: Forzado automático para máxima compatibilidad
+
+### 🧪 Archivo de Prueba
+Se incluye `mobile-compatibility-test.html` para probar la compatibilidad:
+- **Test 1**: QR básico con máxima compatibilidad
+- **Test 2**: QR personalizado para probar colores
+- **Test 3**: QR avanzado con configuraciones óptimas
+
+### 💡 Consejos para Mejor Compatibilidad
+1. **Usa colores con alto contraste** (negro sobre blanco es lo mejor)
+2. **Mantén un tamaño mínimo de 256px** para mejor detección
+3. **Usa corrección de errores M o superior** para mayor robustez
+4. **Agrega bordes blancos** alrededor del QR
+5. **Asegúrate de que las URLs tengan protocolo HTTPS**
+
+### 🚨 Problemas Comunes y Soluciones
+- **iPhone no detecta el QR**: Usa contraste máximo y tamaño 256px+
+- **Android detecta como texto**: Verifica que la URL tenga protocolo
+- **Escaneo lento**: Aumenta el tamaño y usa corrección de errores alta
+- **No funciona en poca luz**: Activa la opción de contraste máximo
+
 ## 🔧 Solución de Problemas
 
 ### Error: "QRCode is not defined"

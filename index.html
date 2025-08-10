@@ -1497,7 +1497,8 @@
             </div>
             <div class="header-actions">
                 <div id="storageStatus" class="storage-status"></div>
-                <button class="header-btn" title="Información del almacenamiento" onclick="showStorageInfo()">📊</button>
+                <button class="header-btn" title="Resultados de encuestas" onclick="openSurveyResultsModal()">📊</button>
+                <button class="header-btn" title="Información del almacenamiento" onclick="showStorageInfo()">💾</button>
                 <button class="header-btn" title="Limpiar almacenamiento" onclick="clearStorage()">🗑️</button>
                 <button class="header-btn" title="Ayuda" onclick="showHelp()">?</button>
                 <button class="header-btn mobile-menu-btn" title="Menú" onclick="toggleMobileMenu()">☰</button>
@@ -1512,8 +1513,12 @@
                     <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
                 </div>
                 <div class="mobile-menu-items">
-                    <button class="mobile-menu-item" onclick="showStorageInfo(); toggleMobileMenu();">
+                    <button class="mobile-menu-item" onclick="openSurveyResultsModal(); toggleMobileMenu();">
                         <span>📊</span>
+                        <span>Resultados de encuestas</span>
+                    </button>
+                    <button class="mobile-menu-item" onclick="showStorageInfo(); toggleMobileMenu();">
+                        <span>💾</span>
                         <span>Información del almacenamiento</span>
                     </button>
                     <button class="mobile-menu-item" onclick="clearStorage(); toggleMobileMenu();">
@@ -1619,6 +1624,66 @@
                     <option value="Q">Alto (25%)</option>
                     <option value="H">Máximo (30%)</option>
                 </select>
+                <small style="color: #000000; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+                    Recomendado: Medio (15%) para mejor compatibilidad móvil
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">🔧 Opciones de Compatibilidad Móvil</label>
+                <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; color: #0c4a6e;">
+                            <input type="checkbox" id="mobileOptimization" checked>
+                            Optimizar para dispositivos móviles
+                        </label>
+                        <small style="color: #0c4a6e; font-size: 0.875rem; margin-left: 1.5rem;">
+                            Mejora la compatibilidad con Android e iPhone
+                        </small>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; color: #0c4a6e;">
+                            <input type="checkbox" id="highContrast" checked>
+                            Contraste máximo
+                        </label>
+                        <small style="color: #0c4a6e; font-size: 0.875rem; margin-left: 1.5rem;">
+                            Asegura mejor escaneo en diferentes condiciones de luz
+                        </small>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; color: #0c4a6e;">
+                            <input type="checkbox" id="addBorder" checked>
+                            Borde de seguridad
+                        </label>
+                        <small style="color: #0c4a6e; font-size: 0.875rem; margin-left: 1.5rem;">
+                            Agrega borde blanco para mejor detección
+                        </small>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; color: #0c4a6e;">
+                            <input type="checkbox" id="forceProtocol" checked>
+                            Forzar protocolo HTTPS
+                        </label>
+                        <small style="color: #0c4a6e; font-size: 0.875rem; margin-left: 1.5rem;">
+                            Agrega https:// si no está presente para máxima compatibilidad
+                        </small>
+                    </div>
+                    
+                    <div style="background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="color: #065f46; font-size: 1.25rem;">ℹ️</span>
+                            <strong style="color: #065f46;">Información de Compatibilidad</strong>
+                        </div>
+                        <p style="color: #065f46; font-size: 0.875rem; margin: 0; line-height: 1.5;">
+                            <strong>Android:</strong> Compatible con todas las versiones y aplicaciones de cámara<br>
+                            <strong>iPhone:</strong> Optimizado para la aplicación Cámara nativa y apps de terceros<br>
+                            <strong>Otros:</strong> Compatible con cualquier dispositivo que soporte códigos QR estándar
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -1652,6 +1717,9 @@
                 </button>
                 <button class="btn btn-secondary" onclick="saveQR()">
                     💾 Guardar QR
+                </button>
+                <button class="btn btn-secondary" onclick="openSurveyModal()" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                    📝 Crear Encuesta
                 </button>
             </div>
 
@@ -1715,6 +1783,103 @@
             <div class="button-group">
                 <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
                 <button class="btn btn-primary" onclick="updateDynamicQR()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Survey Creation -->
+    <div id="surveyModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>📝 Crear Encuesta de Reseñas</h3>
+                <button class="modal-close" onclick="closeSurveyModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="surveyTitle">Título de la Encuesta</label>
+                <input type="text" class="form-input" id="surveyTitle" placeholder="Encuesta de Satisfacción - Los Nogales" value="Encuesta de Satisfacción - Los Nogales">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="surveyDescription">Descripción</label>
+                <textarea class="form-textarea" id="surveyDescription" rows="3" placeholder="Ayúdanos a mejorar tu experiencia compartiendo tu opinión">Tu opinión es muy importante para nosotros. Por favor, tómate un momento para responder estas 3 preguntas y ayudarnos a mejorar nuestro servicio.</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Preguntas de la Encuesta</label>
+                <div id="surveyQuestions" style="background: #f8fafc; border-radius: 12px; padding: 1.5rem; border: 1px solid #e5e7eb;">
+                    <div class="survey-question" style="margin-bottom: 2rem; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h4 style="color: #10b981; margin-bottom: 0.5rem;">1. ¿Cómo calificarías tu experiencia general?</h4>
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Del 1 al 5, donde 1 es muy mala y 5 es excelente</p>
+                        <div class="rating-options" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                                <input type="radio" name="q1" value="1" style="margin: 0;"> 1
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                                <input type="radio" name="q1" value="2" style="margin: 0;"> 2
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                                <input type="radio" name="q1" value="3" style="margin: 0;"> 3
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                                <input type="radio" name="q1" value="4" style="margin: 0;"> 4
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                                <input type="radio" name="q1" value="5" style="margin: 0;"> 5
+                            </label>
+                        </div>
+                    </div>
+                    <div class="survey-question" style="margin-bottom: 2rem; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h4 style="color: #10b981; margin-bottom: 0.5rem;">2. ¿Recomendarías nuestro servicio a otros?</h4>
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona una opción</p>
+                        <div class="rating-options" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                                <input type="radio" name="q2" value="Definitivamente sí" style="margin: 0;"> Definitivamente sí
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                                <input type="radio" name="q2" value="Probablemente sí" style="margin: 0;"> Probablemente sí
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                                <input type="radio" name="q2" value="No estoy seguro" style="margin: 0;"> No estoy seguro
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                                <input type="radio" name="q2" value="Probablemente no" style="margin: 0;"> Probablemente no
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                                <input type="radio" name="q2" value="Definitivamente no" style="margin: 0;"> Definitivamente no
+                            </label>
+                        </div>
+                    </div>
+                    <div class="survey-question" style="padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h4 style="color: #10b981; margin-bottom: 0.5rem;">3. ¿Qué te gustaría que mejoremos?</h4>
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Comentarios adicionales (opcional)</p>
+                        <textarea class="form-textarea" id="q3" rows="3" placeholder="Comparte tus sugerencias para mejorar nuestro servicio..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="closeSurveyModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="createSurvey()" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                    📝 Crear Encuesta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Survey Results -->
+    <div id="surveyResultsModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 80vh;">
+            <div class="modal-header">
+                <h3>📊 Resultados de Encuestas</h3>
+                <button class="modal-close" onclick="closeSurveyResultsModal()">&times;</button>
+            </div>
+            <div id="surveyResultsContent" style="max-height: 60vh; overflow-y: auto;">
+                <!-- Los resultados se cargarán aquí -->
+            </div>
+            <div class="button-group" style="margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="exportSurveyResults()">
+                    📄 Exportar Datos
+                </button>
+                <button class="btn btn-danger" onclick="clearSurveyResults()">
+                    🗑️ Limpiar Datos
+                </button>
             </div>
         </div>
     </div>
@@ -2189,11 +2354,17 @@
 
         function generateQR() {
             const qrType = document.getElementById('qrType').value;
-            const url = document.getElementById('qrUrl').value.trim();
+            let url = document.getElementById('qrUrl').value.trim();
             
             if (qrType === 'dynamic' && !url) {
                 showMessage('Para QRs dinámicos, debes especificar una URL inicial', 'error');
                 return;
+            }
+
+            // Aplicar optimizaciones de compatibilidad móvil
+            if (document.getElementById('forceProtocol').checked && url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+                document.getElementById('qrUrl').value = url;
             }
 
             // Si no hay URL, usar un texto de demostración para mostrar los colores
@@ -2229,12 +2400,52 @@
                 const encodedName = btoa(encodeURIComponent(qrNameForDynamic));
             }
             
+            // MEJORA: Asegurar que la URL tenga el protocolo correcto para máxima compatibilidad
+            if (qrText && !qrText.startsWith('http://') && !qrText.startsWith('https://') && !qrText.startsWith('tel:') && !qrText.startsWith('mailto:') && !qrText.startsWith('sms:') && !qrText.startsWith('geo:')) {
+                // Si no tiene protocolo, agregar https:// para máxima compatibilidad
+                qrText = 'https://' + qrText;
+            }
+            
+            // MEJORA: Optimizar opciones para máxima compatibilidad móvil
+            let qrWidth = parseInt(document.getElementById('qrSize').value);
+            let qrHeight = parseInt(document.getElementById('qrSize').value);
+            
+            // Aplicar optimizaciones de compatibilidad móvil
+            if (document.getElementById('mobileOptimization').checked) {
+                // Aumentar el tamaño mínimo para mejor compatibilidad
+                if (qrWidth < 256) {
+                    qrWidth = 256;
+                    qrHeight = 256;
+                    document.getElementById('qrSize').value = '256';
+                }
+                
+                // Usar corrección de errores alta para mejor compatibilidad
+                if (document.getElementById('errorCorrection').value === 'L') {
+                    document.getElementById('errorCorrection').value = 'M';
+                }
+            }
+
+            // Aplicar contraste máximo si está habilitado
+            let qrColorDark = document.getElementById('foregroundColor').value;
+            let qrColorLight = document.getElementById('backgroundColor').value;
+            if (document.getElementById('highContrast').checked) {
+                qrColorDark = '#000000';
+                qrColorLight = '#FFFFFF';
+                document.getElementById('foregroundColor').value = '#000000';
+                document.getElementById('backgroundColor').value = '#FFFFFF';
+            }
+
             const options = {
-                width: parseInt(document.getElementById('qrSize').value),
-                height: parseInt(document.getElementById('qrSize').value),
-                colorDark: document.getElementById('foregroundColor').value,
-                colorLight: document.getElementById('backgroundColor').value,
-                correctLevel: getErrorCorrectionLevel(document.getElementById('errorCorrection').value)
+                width: qrWidth,
+                height: qrHeight,
+                colorDark: qrColorDark,
+                colorLight: qrColorLight,
+                correctLevel: getErrorCorrectionLevel(document.getElementById('errorCorrection').value),
+                // MEJORA: Agregar opciones específicas para compatibilidad móvil
+                margin: document.getElementById('addBorder').checked ? 4 : 2, // Margen aumentado para mejor escaneo
+                scale: 4, // Escala para mejor resolución
+                version: 1, // Versión mínima del QR para mejor compatibilidad
+                maskPattern: 0 // Patrón de máscara estándar
             };
 
             // Debug: Mostrar las opciones en consola
@@ -2275,6 +2486,11 @@
                         foreground: options.colorDark,
                         background: options.colorLight
                     });
+
+                    // MEJORA: Aplicar post-procesamiento para mejor compatibilidad móvil
+                    if (document.getElementById('mobileOptimization').checked) {
+                        enhanceQRForMobile(generatedCanvas, options);
+                    }
 
                     // Aplicar colores personalizados al canvas
                     colorizeQRCanvas(generatedCanvas, options.colorDark, options.colorLight);
@@ -2322,12 +2538,51 @@
                     // Ocultar botón de guardar cambios (no hay cambios pendientes en un QR nuevo)
                     document.getElementById('saveChangesBtn').style.display = 'none';
                     
-                    showMessage('Código QR generado exitosamente', 'success');
+                    showMessage('Código QR generado exitosamente con compatibilidad móvil mejorada', 'success');
                 });
             } catch (error) {
                 showLoading(false);
                 console.error('QR Generation exception:', error);
                 showMessage('Error inesperado al generar el código QR: ' + error.message, 'error');
+            }
+        }
+
+        // NUEVA FUNCIÓN: Mejorar QR para compatibilidad móvil
+        function enhanceQRForMobile(canvas, options) {
+            try {
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // MEJORA 1: Asegurar contraste máximo para mejor escaneo
+                const threshold = 128;
+                for (let i = 0; i < data.length; i += 4) {
+                    const gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    if (gray > threshold) {
+                        // Fondo blanco puro
+                        data[i] = 255;     // R
+                        data[i + 1] = 255; // G
+                        data[i + 2] = 255; // B
+                    } else {
+                        // QR negro puro
+                        data[i] = 0;       // R
+                        data[i + 1] = 0;   // G
+                        data[i + 2] = 0;   // B
+                    }
+                }
+                
+                // MEJORA 2: Aplicar anti-aliasing suave para bordes más definidos
+                ctx.putImageData(imageData, 0, 0);
+                
+                // MEJORA 3: Agregar borde de seguridad para mejor escaneo
+                const borderSize = Math.max(2, Math.floor(options.width * 0.02));
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = borderSize;
+                ctx.strokeRect(borderSize/2, borderSize/2, canvas.width - borderSize, canvas.height - borderSize);
+                
+                console.log('QR mejorado para compatibilidad móvil');
+            } catch (error) {
+                console.error('Error al mejorar QR para móvil:', error);
             }
         }
 
@@ -3604,6 +3859,304 @@
             document.getElementById('saveChangesBtn').style.display = 'none';
 
             showMessage('Formulario limpiado. Listo para crear un nuevo QR', 'success');
+        }
+
+        // ===== SISTEMA DE ENCUESTAS =====
+        
+        // Función para abrir el modal de creación de encuesta
+        function openSurveyModal() {
+            document.getElementById('surveyModal').style.display = 'flex';
+        }
+
+        // Función para cerrar el modal de creación de encuesta
+        function closeSurveyModal() {
+            document.getElementById('surveyModal').style.display = 'none';
+        }
+
+        // Función para crear la encuesta
+        function createSurvey() {
+            const title = document.getElementById('surveyTitle').value.trim();
+            const description = document.getElementById('surveyDescription').value.trim();
+            
+            if (!title) {
+                showMessage('Por favor ingresa un título para la encuesta', 'error');
+                return;
+            }
+
+            // Crear la página de encuesta
+            const surveyPage = createSurveyPage(title, description);
+            
+            // Generar QR para la encuesta
+            generateSurveyQR(surveyPage, title);
+            
+            closeSurveyModal();
+        }
+
+        // Función para crear la página HTML de la encuesta
+        function createSurveyPage(title, description) {
+            const surveyId = generateId();
+            
+            // Crear una URL simple que abra una nueva ventana con la encuesta
+            const surveyUrl = 'survey-template.html';
+            
+            // Guardar los datos de la encuesta en localStorage para que se pueda acceder desde el template
+            const surveyConfig = {
+                id: surveyId,
+                title: title,
+                description: description,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('currentSurveyConfig', JSON.stringify(surveyConfig));
+            
+            return surveyUrl;
+        }
+
+        // Función para generar QR de la encuesta
+        function generateSurveyQR(surveyHTML, title) {
+            // Crear un blob con el HTML de la encuesta
+            const blob = new Blob([surveyHTML], { type: 'text/html' });
+            const surveyUrl = URL.createObjectURL(blob);
+            
+            // Configurar el formulario para generar el QR
+            document.getElementById('qrType').value = 'static';
+            document.getElementById('qrUrl').value = surveyUrl;
+            document.getElementById('qrTitle').value = 'Encuesta: ' + title;
+            document.getElementById('qrDescription').value = 'QR para encuesta de reseñas de clientes';
+            
+            // Generar el QR
+            generateQR();
+            
+            showMessage('Encuesta creada exitosamente. El QR generado abrirá la encuesta cuando los clientes lo escaneen.', 'success');
+        }
+
+        // Función para abrir el modal de resultados de encuestas
+        function openSurveyResultsModal() {
+            const modal = document.getElementById('surveyResultsModal');
+            const content = document.getElementById('surveyResultsContent');
+            
+            // Cargar resultados
+            loadSurveyResults(content);
+            
+            modal.style.display = 'flex';
+        }
+
+        // Función para cerrar el modal de resultados
+        function closeSurveyResultsModal() {
+            document.getElementById('surveyResultsModal').style.display = 'none';
+        }
+
+        // Función para cargar y mostrar los resultados de las encuestas
+        function loadSurveyResults(container) {
+            try {
+                const allResults = JSON.parse(localStorage.getItem('allSurveyResults') || '[]');
+                
+                if (allResults.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <h3>📊 No hay resultados de encuestas</h3>
+                            <p>Las respuestas de los clientes aparecerán aquí una vez que completen las encuestas.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Agrupar por encuesta
+                const groupedResults = {};
+                allResults.forEach(result => {
+                    if (!groupedResults[result.surveyId]) {
+                        groupedResults[result.surveyId] = [];
+                    }
+                    groupedResults[result.surveyId].push(result);
+                });
+
+                let html = '<div style="margin-bottom: 2rem;">';
+                
+                Object.keys(groupedResults).forEach(surveyId => {
+                    const results = groupedResults[surveyId];
+                    const surveyTitle = results[0].title || 'Encuesta sin título';
+                    
+                    html += `
+                        <div style="background: #f8fafc; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+                            <h3 style="color: #10b981; margin-bottom: 1rem;">${surveyTitle}</h3>
+                            <p style="color: #6b7280; margin-bottom: 1rem;">Total de respuestas: ${results.length}</p>
+                            
+                            <div style="display: grid; gap: 1rem;">
+                                ${results.map((result, index) => `
+                                    <div style="background: white; border-radius: 8px; padding: 1rem; border: 1px solid #e5e7eb;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                            <strong style="color: #374151;">Respuesta #${index + 1}</strong>
+                                            <small style="color: #6b7280;">${new Date(result.timestamp).toLocaleString('es-ES')}</small>
+                                        </div>
+                                        <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                                            <div><strong>Experiencia:</strong> ${result.q1}/5</div>
+                                            <div><strong>Recomendación:</strong> ${result.q2}</div>
+                                            ${result.q3 ? `<div><strong>Comentarios:</strong> "${result.q3}"</div>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                                <h4 style="color: #374151; margin-bottom: 0.5rem;">📈 Resumen Estadístico</h4>
+                                ${generateSurveyStats(results)}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error al cargar resultados:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc2626;">
+                        <h3>❌ Error al cargar resultados</h3>
+                        <p>No se pudieron cargar los resultados de las encuestas.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Función para generar estadísticas de la encuesta
+        function generateSurveyStats(results) {
+            // Calcular promedio de experiencia
+            const experiences = results.map(r => parseInt(r.q1)).filter(x => !isNaN(x));
+            const avgExperience = experiences.length > 0 ? (experiences.reduce((a, b) => a + b, 0) / experiences.length).toFixed(1) : 'N/A';
+            
+            // Contar recomendaciones
+            const recommendations = {};
+            results.forEach(r => {
+                recommendations[r.q2] = (recommendations[r.q2] || 0) + 1;
+            });
+            
+            // Contar comentarios
+            const comments = results.filter(r => r.q3 && r.q3.trim()).length;
+            
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+                    <div style="background: #dcfce7; padding: 0.75rem; border-radius: 6px; text-align: center;">
+                        <div style="font-weight: 600; color: #166534;">Experiencia Promedio</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #10b981;">${avgExperience}/5</div>
+                    </div>
+                    <div style="background: #dbeafe; padding: 0.75rem; border-radius: 6px; text-align: center;">
+                        <div style="font-weight: 600; color: #1e40af;">Total Respuestas</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #3b82f6;">${results.length}</div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 0.75rem; border-radius: 6px; text-align: center;">
+                        <div style="font-weight: 600; color: #92400e;">Con Comentarios</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #f59e0b;">${comments}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <h5 style="color: #374151; margin-bottom: 0.5rem;">Distribución de Recomendaciones:</h5>
+                    <div style="display: grid; gap: 0.25rem;">
+                        ${Object.entries(recommendations).map(([rec, count]) => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0;">
+                                <span style="font-size: 0.85rem;">${rec}</span>
+                                <span style="font-weight: 600; color: #10b981;">${count}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para exportar resultados de encuestas
+        function exportSurveyResults() {
+            try {
+                const allResults = JSON.parse(localStorage.getItem('allSurveyResults') || '[]');
+                
+                if (allResults.length === 0) {
+                    showMessage('No hay datos para exportar', 'error');
+                    return;
+                }
+
+                // Crear CSV
+                const headers = ['Fecha', 'Encuesta', 'Experiencia', 'Recomendación', 'Comentarios'];
+                const csvContent = [
+                    headers.join(','),
+                    ...allResults.map(result => [
+                        new Date(result.timestamp).toLocaleString('es-ES'),
+                        result.title,
+                        result.q1,
+                        result.q2,
+                        result.q3 ? `"${result.q3.replace(/"/g, '""')}"` : ''
+                    ].join(','))
+                ].join('\n');
+
+                // Crear y descargar archivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `encuestas_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showMessage('Datos exportados exitosamente', 'success');
+                
+            } catch (error) {
+                console.error('Error al exportar:', error);
+                showMessage('Error al exportar los datos', 'error');
+            }
+        }
+
+        // Función para mejorar la compatibilidad móvil del QR
+        function enhanceQRForMobile(canvas, options) {
+            try {
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // Aplicar filtro de suavizado para mejor escaneo
+                for (let i = 0; i < data.length; i += 4) {
+                    // Solo procesar píxeles negros (QR)
+                    if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0) {
+                        // Hacer los bordes más suaves para mejor detección
+                        data[i] = 0;     // R
+                        data[i + 1] = 0; // G
+                        data[i + 2] = 0; // B
+                        data[i + 3] = 255; // A - opacidad completa
+                    }
+                }
+                
+                // Aplicar la imagen procesada
+                ctx.putImageData(imageData, 0, 0);
+                
+                console.log('✅ QR optimizado para dispositivos móviles');
+                
+            } catch (error) {
+                console.error('Error al optimizar QR para móviles:', error);
+            }
+        }
+
+        // Función para limpiar resultados de encuestas
+        function clearSurveyResults() {
+            if (confirm('¿Estás seguro de que quieres eliminar todos los resultados de encuestas? Esta acción no se puede deshacer.')) {
+                try {
+                    localStorage.removeItem('allSurveyResults');
+                    
+                    // También limpiar encuestas individuales
+                    const keys = Object.keys(localStorage);
+                    keys.forEach(key => {
+                        if (key.startsWith('surveyResults_')) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                    
+                    showMessage('Resultados de encuestas eliminados', 'success');
+                    closeSurveyResultsModal();
+                    
+                } catch (error) {
+                    console.error('Error al limpiar resultados:', error);
+                    showMessage('Error al limpiar los resultados', 'error');
+                }
+            }
         }
     </script>
 
